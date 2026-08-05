@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.astro/
+.next/
+out/
+.wrangler/
+.DS_Store
+Thumbs.db
+*.log
+.local/
