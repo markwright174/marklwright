@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Study Workspace</title>
+  <meta name="description" content="Private study workspace for organizing class transcripts, notes, audio review, and study questions.">
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="stylesheet" href="/assets/study.css">
+</head>
+<body class="study-body">
+  <main class="study-shell">
+    <section class="study-hero">
+      <div>
+        <p class="eyebrow">Lily's study space</p>
+        <h1>Bring class recordings home and turn them into study help.</h1>
+        <p class="lede">After the Plaud uploads and finishes its notes, use this page to pull the new recordings in, sort them by class, and keep the useful pieces in one place.</p>
+      </div>
+      <aside class="study-status" aria-label="Workspace status">
+        <p class="meta">Family workspace</p>
+        <p>This page is not linked from the public site. Before real school content goes online, it should get a simple access gate.</p>
+      </aside>
+    </section>
+
+    <section class="study-layout intake-layout">
+      <article class="study-panel">
+        <p class="eyebrow">Transcript intake</p>
+        <h2>Plaud recordings</h2>
+        <p>When Lily gets home, give the Plaud time to upload and let AutoFlow finish. Then bring in the new recordings, glance at each one, and send it to the right class.</p>
+        <div class="plaud-box" aria-live="polite">
+          <div>
+            <p class="meta">Lily's recorder</p>
+            <p class="plaud-device">Device filter: <code>8810B30300523466</code></p>
+          </div>
+          <button class="button primary" id="updateTranscripts" type="button">Update transcripts</button>
+          <p class="plaud-status" id="plaudStatus">Not connected yet. This button is ready for the Cloudflare function.</p>
+        </div>
+
+        <div class="intake-workbench">
+          <div>
+            <div class="section-head compact-head">
+              <div>
+                <p class="eyebrow">Ready to sort</p>
+                <h3>New recordings</h3>
+              </div>
+            </div>
+            <div id="intakeList" class="intake-list" aria-live="polite"></div>
+          </div>
+          <aside class="recording-preview" id="recordingPreview" aria-live="polite">
+            <p class="meta">Preview</p>
+            <h3>Select a recording</h3>
+            <p>Choose one from the list to check the summary and transcript before sending it to a class.</p>
+          </aside>
+        </div>
+      </article>
+
+      <article class="study-panel">
+        <p class="eyebrow">Study helper</p>
+        <h2>What the assistant should make</h2>
+        <div class="helper-list">
+          <label><input type="checkbox" checked> Clean summary</label>
+          <label><input type="checkbox" checked> Key terms</label>
+          <label><input type="checkbox" checked> Quiz questions</label>
+          <label><input type="checkbox"> Explain it like I am in 8th grade</label>
+          <label><input type="checkbox"> Text-to-speech review script</label>
+        </div>
+        <p class="study-note">Later, this can become a focused tutor: explain this lesson, quiz me one question at a time, make flashcards, or turn this into audio review.</p>
+      </article>
+    </section>
+
+    <section class="study-section">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Classes</p>
+          <h2>Course pages</h2>
+        </div>
+      </div>
+      <div class="class-grid" id="classGrid" aria-label="Class cards"></div>
+    </section>
+  </main>
+  <script src="/assets/study.js"></script>
+</body>
+</html>

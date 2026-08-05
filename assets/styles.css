@@ -201,6 +201,49 @@ a:hover{color:var(--accent-strong)}
   grid-template-columns:minmax(0, 720px);
 }
 
+.portfolio-preview-grid{
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+}
+
+.category-grid{
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0, 1fr));
+  gap:16px;
+  margin-top:42px;
+}
+
+.home-category-grid{
+  margin-top:0;
+}
+
+.category-card{
+  display:block;
+  min-height:100%;
+  padding:24px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:var(--panel);
+  color:var(--text);
+  text-decoration:none;
+  box-shadow:var(--shadow);
+}
+
+.category-card:hover{
+  color:var(--text);
+  border-color:var(--accent);
+}
+
+.category-card h2,
+.category-card h3{
+  margin:0 0 10px;
+  line-height:1.2;
+}
+
+.category-card p:last-child{
+  margin:0;
+  color:var(--muted);
+}
+
 .work-card,
 .timeline-item{
   padding:22px;
@@ -210,6 +253,13 @@ a:hover{color:var(--accent-strong)}
 .timeline-item p{
   margin:0;
   color:var(--muted);
+}
+
+.work-card .card-link{
+  display:inline-flex;
+  margin-top:18px;
+  font-weight:800;
+  text-decoration:none;
 }
 
 .work-card h2,
@@ -286,11 +336,49 @@ a:hover{color:var(--accent-strong)}
   border:0;
 }
 
+.artifact-preview{
+  overflow:hidden;
+  max-width:900px;
+  margin:0;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:#fff;
+  box-shadow:var(--shadow);
+}
+
+.artifact-preview img{
+  display:block;
+  width:100%;
+  height:auto;
+}
+
 .artifact-note{
   max-width:820px;
   margin:16px 0 0;
   color:var(--muted);
   font-size:.95rem;
+}
+
+.portfolio-lane{
+  margin-top:46px;
+}
+
+.tool-callout{
+  max-width:820px;
+  padding:26px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:var(--panel);
+  box-shadow:var(--shadow);
+}
+
+.tool-callout h2{
+  margin:0 0 10px;
+  font-size:2rem;
+}
+
+.tool-callout p{
+  color:var(--muted);
 }
 
 .link-list{
@@ -329,7 +417,9 @@ a:hover{color:var(--accent-strong)}
 
   .hero,
   .two-column,
-  .card-grid{
+  .card-grid,
+  .portfolio-preview-grid,
+  .category-grid{
     grid-template-columns:1fr;
   }
 
