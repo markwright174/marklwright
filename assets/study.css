@@ -5,22 +5,22 @@
 .study-shell{
   width:min(1180px, calc(100% - 32px));
   margin:0 auto;
-  padding:42px 0 72px;
+  padding:28px 0 72px;
 }
 
 .study-hero{
   display:grid;
   grid-template-columns:minmax(0, 1fr) minmax(260px, 360px);
-  gap:28px;
+  gap:18px;
   align-items:end;
-  padding:34px 0 28px;
+  padding:18px 0 20px;
 }
 
 .study-hero h1{
   max-width:880px;
   margin:0;
-  font-size:clamp(2.3rem, 5vw, 4.8rem);
-  line-height:1;
+  font-size:clamp(2rem, 3.8vw, 3.4rem);
+  line-height:1.06;
   letter-spacing:0;
 }
 
@@ -35,7 +35,7 @@
 }
 
 .study-status{
-  padding:22px;
+  padding:18px;
 }
 
 .study-status p:last-child,
@@ -94,7 +94,7 @@
   display:grid;
   grid-template-columns:minmax(0, 1.25fr) minmax(300px, .75fr);
   gap:18px;
-  margin-top:42px;
+  margin-top:24px;
 }
 
 .intake-layout{
