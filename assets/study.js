@@ -41,6 +41,22 @@ function getItemText(item) {
   return String(item.text || item.summary || '').trim();
 }
 
+function createStoredItem(item, existingItem = {}) {
+  const text = getItemText(item);
+  return {
+    id: existingItem.id || crypto.randomUUID(),
+    sourceId: item.sourceId,
+    title: String(item.title || existingItem.title || 'Plaud recording').trim(),
+    classId: existingItem.classId || 'unassigned',
+    text,
+    summary: String(item.summary || '').trim(),
+    preview: getPreview(text),
+    createdAt: existingItem.createdAt || new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    recordedAt: item.recordedAt || existingItem.recordedAt || null,
+  };
+}
+
 function escapeHtml(value) {
   return String(value).replace(/[&<>"']/g, (character) => ({
     '&': '&amp;',
@@ -217,33 +233,31 @@ updateTranscripts.addEventListener('click', async () => {
     }
 
     const saved = getSaved();
-    const existingSourceIds = new Set(saved.map((item) => item.sourceId).filter(Boolean));
+    const existingBySourceId = new Map(saved.map((item) => [item.sourceId, item]).filter(([sourceId]) => sourceId));
+    const incomingBySourceId = new Map(incoming.filter((item) => item.sourceId).map((item) => [item.sourceId, item]));
+    const updatedItems = saved.map((item) => {
+      const incomingItem = incomingBySourceId.get(item.sourceId);
+      return incomingItem ? createStoredItem(incomingItem, item) : item;
+    });
     const newItems = incoming
-      .filter((item) => item.sourceId && !existingSourceIds.has(item.sourceId))
-      .map((item) => {
-        const text = getItemText(item);
-        return {
-          id: crypto.randomUUID(),
-          sourceId: item.sourceId,
-          title: String(item.title || 'Plaud recording').trim(),
-          classId: 'unassigned',
-          text,
-          summary: String(item.summary || '').trim(),
-          preview: getPreview(text),
-          createdAt: new Date().toISOString(),
-          recordedAt: item.recordedAt || null,
-        };
-      });
+      .filter((item) => item.sourceId && !existingBySourceId.has(item.sourceId))
+      .map((item) => createStoredItem(item));
 
-    if (!newItems.length) {
+    if (!newItems.length && !incomingBySourceId.size) {
       plaudStatus.textContent = 'Everything Plaud returned is already in the sorting list.';
       return;
     }
 
-    setSaved([...saved, ...newItems]);
-    setSelectedItem(newItems[0].id);
+    setSaved([...updatedItems, ...newItems]);
+    if (newItems.length) {
+      setSelectedItem(newItems[0].id);
+    }
     renderAll();
-    plaudStatus.textContent = `Added ${newItems.length} recording${newItems.length === 1 ? '' : 's'} to the sorting list.`;
+    if (newItems.length) {
+      plaudStatus.textContent = `Added ${newItems.length} recording${newItems.length === 1 ? '' : 's'} to the sorting list.`;
+    } else {
+      plaudStatus.textContent = `Updated ${incomingBySourceId.size} existing recording${incomingBySourceId.size === 1 ? '' : 's'}.`;
+    }
   } catch {
     plaudStatus.textContent = 'The import endpoint is not available from this preview yet.';
   } finally {
