@@ -3,6 +3,12 @@
   "name": "marklwright",
   "compatibility_date": "2026-08-06",
   "pages_build_output_dir": "dist",
+  "vars": {
+    "STUDY_AI_MODEL": "@cf/ibm-granite/granite-4.0-h-micro"
+  },
+  "ai": {
+    "binding": "AI"
+  },
   "d1_databases": [
     {
       "binding": "STUDY_DB",

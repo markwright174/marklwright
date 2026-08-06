@@ -316,6 +316,70 @@
   font:inherit;
 }
 
+.study-chat{
+  display:grid;
+  grid-template-columns:minmax(280px, 420px) minmax(0, 1fr);
+  gap:16px;
+  max-width:980px;
+}
+
+.chat-controls,
+.chat-answer{
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:18px;
+  background:#fff;
+  box-shadow:var(--shadow);
+}
+
+.chat-controls{
+  display:grid;
+  gap:10px;
+}
+
+.chat-controls label{
+  font-weight:800;
+}
+
+.chat-controls select,
+.chat-controls textarea{
+  width:100%;
+  border:1px solid var(--line);
+  border-radius:4px;
+  padding:10px 12px;
+  color:var(--text);
+  background:#fff;
+  font:inherit;
+}
+
+.mode-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin:4px 0;
+}
+
+.mode-row .button{
+  min-height:36px;
+  padding:0 12px;
+}
+
+.mode-row .button.active{
+  color:#fff;
+  background:var(--accent);
+}
+
+.chat-status{
+  margin:0;
+  color:var(--muted);
+  font-size:.95rem;
+}
+
+.chat-answer{
+  min-height:240px;
+  color:var(--muted);
+}
+
 .back-link{
   display:inline-flex;
   margin-bottom:24px;
@@ -333,6 +397,7 @@
   .study-hero,
   .study-layout,
   .intake-workbench,
+  .study-chat,
   .class-grid,
   .saved-list,
   .plaud-box{
