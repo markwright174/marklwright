@@ -43,6 +43,12 @@ async function incrementUsage(env, usageDate) {
 
 function getModeInstruction(mode) {
   switch (mode) {
+    case 'coach':
+      return 'Coach the student with hints, questions, and a next step. Do not give a final answer unless it is needed to explain a concept.';
+    case 'steps':
+      return 'Break the problem or question into clear next steps. Stop short of completing the whole assignment.';
+    case 'check':
+      return 'Check the student\'s thinking. Point out what seems right, what needs another look, and one useful next step.';
     case 'quiz':
       return 'Ask 3-5 short review questions. Do not provide answers unless the student asks.';
     case 'explain':
@@ -96,11 +102,12 @@ export async function onRequestPost({ request, env }) {
   const body = await request.json().catch(() => ({}));
   const question = cleanText(body.question, MAX_QUESTION_CHARS);
   const mode = cleanText(body.mode || 'help', 40);
+  const scope = cleanText(body.scope || 'recording', 40);
   const contextTitle = cleanText(body.contextTitle, 180);
   const contextSummary = cleanText(body.contextSummary, MAX_CONTEXT_CHARS / 2);
   const contextText = cleanText(body.contextText, MAX_CONTEXT_CHARS);
 
-  if (!question && !mode) {
+  if (scope === 'general' && !question) {
     return json(
       {
         ok: false,
@@ -112,6 +119,16 @@ export async function onRequestPost({ request, env }) {
   }
 
   const model = env.STUDY_AI_MODEL || DEFAULT_MODEL;
+  const hasContext = Boolean(contextTitle || contextSummary || contextText);
+  const scopeInstruction = scope === 'general'
+    ? [
+      'This request may be a general homework, reading, math, or study question.',
+      hasContext
+        ? 'Use the provided context first. If outside knowledge is useful, keep it basic and mark it as general background.'
+        : 'Use general middle-school appropriate knowledge, but coach the student instead of simply giving the answer.',
+      'For math or homework problems, prefer a hint, setup, or first step before any final answer.',
+    ].join(' ')
+    : 'Use only the provided study context. If the answer is not in the context, say so.';
   const messages = [
     {
       role: 'system',
@@ -119,7 +136,7 @@ export async function onRequestPost({ request, env }) {
         'You are Lily\'s lightweight study helper.',
         'Lily is an advanced 8th grade student with ADHD and dysgraphia.',
         'Help her understand, remember, and study. Do not write assignments for her.',
-        'Use only the provided study context. If the answer is not in the context, say so.',
+        scopeInstruction,
         'Keep responses concise, warm, and practical.',
       ].join(' '),
     },

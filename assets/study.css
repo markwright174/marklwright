@@ -323,6 +323,7 @@
   max-width:980px;
 }
 
+.front-chat,
 .chat-controls,
 .chat-answer{
   border:1px solid var(--line);
@@ -335,6 +336,27 @@
 .chat-controls{
   display:grid;
   gap:10px;
+}
+
+.front-chat{
+  display:grid;
+  gap:10px;
+  margin-top:18px;
+}
+
+.front-chat label{
+  font-weight:800;
+}
+
+.front-chat textarea{
+  width:100%;
+  border:1px solid var(--line);
+  border-radius:4px;
+  padding:10px 12px;
+  color:var(--text);
+  background:#fff;
+  font:inherit;
+  resize:vertical;
 }
 
 .chat-controls label{
@@ -378,6 +400,10 @@
 .chat-answer{
   min-height:240px;
   color:var(--muted);
+}
+
+.compact-answer{
+  min-height:140px;
 }
 
 .back-link{

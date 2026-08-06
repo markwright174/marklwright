@@ -14,6 +14,7 @@ const intakeList = document.querySelector('#intakeList');
 const recordingPreview = document.querySelector('#recordingPreview');
 const updateTranscripts = document.querySelector('#updateTranscripts');
 const plaudStatus = document.querySelector('#plaudStatus');
+const frontStudyChat = document.querySelector('#frontStudyChat');
 
 function getSaved() {
   try {
@@ -202,6 +203,61 @@ function renderAll() {
   renderPreview();
 }
 
+function renderFrontStudyChat() {
+  if (!frontStudyChat) return;
+
+  let selectedMode = 'coach';
+  const modeButtons = frontStudyChat.querySelectorAll('button[data-mode]');
+  const status = frontStudyChat.querySelector('#frontChatStatus');
+  const answer = frontStudyChat.querySelector('#frontChatAnswer');
+
+  modeButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      selectedMode = button.dataset.mode;
+      modeButtons.forEach((entry) => entry.classList.remove('active'));
+      button.classList.add('active');
+    });
+  });
+
+  frontStudyChat.querySelector('#askFrontStudyHelper').addEventListener('click', async () => {
+    const question = frontStudyChat.querySelector('#frontQuestion').value.trim();
+    const contextText = frontStudyChat.querySelector('#frontContext').value.trim();
+
+    if (!question) {
+      status.textContent = 'Type a question first.';
+      answer.innerHTML = '<p>No answer was created.</p>';
+      return;
+    }
+
+    status.textContent = 'Thinking...';
+    answer.innerHTML = '<p>Working on it.</p>';
+
+    try {
+      const response = await fetch('/api/study/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          scope: 'general',
+          mode: selectedMode,
+          question,
+          contextText,
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        status.textContent = result.message || 'The study helper could not answer right now.';
+        answer.innerHTML = '<p>No answer was created.</p>';
+        return;
+      }
+      status.textContent = `Daily helper uses left: ${result.usage.remaining}`;
+      answer.innerHTML = `<p>${escapeHtml(result.answer).replace(/\n/g, '<br>')}</p>`;
+    } catch {
+      status.textContent = 'The study helper is not available right now.';
+      answer.innerHTML = '<p>No answer was created.</p>';
+    }
+  });
+}
+
 intakeList.addEventListener('click', (event) => {
   const button = event.target.closest('button[data-recording-id]');
   if (!button) return;
@@ -266,3 +322,4 @@ updateTranscripts.addEventListener('click', async () => {
 });
 
 renderAll();
+renderFrontStudyChat();

@@ -56,15 +56,25 @@
 
       <article class="study-panel">
         <p class="eyebrow">Study helper</p>
-        <h2>What the assistant should make</h2>
-        <div class="helper-list">
-          <label><input type="checkbox" checked> Clean summary</label>
-          <label><input type="checkbox" checked> Key terms</label>
-          <label><input type="checkbox" checked> Quiz questions</label>
-          <label><input type="checkbox"> Explain it like I am in 8th grade</label>
-          <label><input type="checkbox"> Text-to-speech review script</label>
+        <h2>Ask for a study nudge</h2>
+        <p>Use this for quick help before a recording has been sorted. It should guide the next step, explain confusing parts, or help Lily check her thinking without simply doing the work for her.</p>
+        <div class="front-chat" id="frontStudyChat" aria-live="polite">
+          <div class="mode-row" aria-label="Study helper modes">
+            <button class="button secondary active" type="button" data-mode="coach">Guide me</button>
+            <button class="button secondary" type="button" data-mode="steps">Break it down</button>
+            <button class="button secondary" type="button" data-mode="check">Check my thinking</button>
+            <button class="button secondary" type="button" data-mode="quiz">Quiz me</button>
+          </div>
+          <label for="frontQuestion">Question</label>
+          <textarea id="frontQuestion" rows="4" placeholder="Ask about homework, math, reading, or something confusing from class."></textarea>
+          <label for="frontContext">Optional context</label>
+          <textarea id="frontContext" rows="5" placeholder="Paste a short passage, problem, directions, or what you have tried so far."></textarea>
+          <button class="button primary" id="askFrontStudyHelper" type="button">Ask study helper</button>
+          <p class="chat-status" id="frontChatStatus">Free-use guardrails are on. The helper stops after the daily limit.</p>
+          <div class="chat-answer compact-answer" id="frontChatAnswer">
+            <p>Ask for a hint, explanation, or study plan.</p>
+          </div>
         </div>
-        <p class="study-note">Later, this can become a focused tutor: explain this lesson, quiz me one question at a time, make flashcards, or turn this into audio review.</p>
       </article>
     </section>
 
