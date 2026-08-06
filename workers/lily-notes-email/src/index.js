@@ -82,6 +82,14 @@ function parseStudyContent(text) {
   };
 }
 
+function shouldStoreMessage(item) {
+  const title = item.title.toLowerCase();
+  const sender = String(item.fromEmail || '').toLowerCase();
+  if (sender.includes('notify.cloudflare.com')) return false;
+  if (title.includes('verify your email routing address')) return false;
+  return true;
+}
+
 async function hashSourceId(value) {
   const bytes = new TextEncoder().encode(value);
   const digest = await crypto.subtle.digest('SHA-256', bytes);
@@ -143,6 +151,7 @@ export default {
     }
 
     const item = await parseMessage(message);
+    if (!shouldStoreMessage(item)) return;
     await storeTranscript(env, item);
   },
 };
