@@ -1,6 +1,36 @@
-import PostalMime from 'postal-mime';
-
 const DEFAULT_ALLOWED_RECIPIENT = 'lily-notes@marklwright.com';
+
+function decodeHeader(value) {
+  return String(value || '').replace(/=\?utf-8\?q\?([^?]+)\?=/gi, (_, encoded) => encoded
+    .replace(/_/g, ' ')
+    .replace(/=([a-f0-9]{2})/gi, (_match, hex) => String.fromCharCode(Number.parseInt(hex, 16))));
+}
+
+function parseRawEmail(rawText) {
+  const normalized = rawText.replace(/\r\n/g, '\n');
+  const [rawHeaders, ...bodyParts] = normalized.split('\n\n');
+  const headers = {};
+  let lastKey = null;
+
+  for (const line of rawHeaders.split('\n')) {
+    if (/^\s/.test(line) && lastKey) {
+      headers[lastKey] += ` ${line.trim()}`;
+      continue;
+    }
+    const index = line.indexOf(':');
+    if (index === -1) continue;
+    lastKey = line.slice(0, index).trim().toLowerCase();
+    headers[lastKey] = line.slice(index + 1).trim();
+  }
+
+  return {
+    subject: decodeHeader(headers.subject || ''),
+    from: headers.from || '',
+    date: headers.date || '',
+    messageId: headers['message-id'] || '',
+    body: bodyParts.join('\n\n'),
+  };
+}
 
 function stripHtml(html) {
   return String(html || '')
@@ -59,9 +89,9 @@ async function hashSourceId(value) {
 }
 
 async function parseMessage(message) {
-  const raw = await new Response(message.raw).arrayBuffer();
-  const parsed = await PostalMime.parse(raw);
-  const bodyText = parsed.text || stripHtml(parsed.html);
+  const rawText = await new Response(message.raw).text();
+  const parsed = parseRawEmail(rawText);
+  const bodyText = stripHtml(parsed.body);
   const content = parseStudyContent(bodyText);
   const sourceSeed = [
     parsed.messageId,
@@ -77,7 +107,7 @@ async function parseMessage(message) {
     summary: content.summary,
     transcript: content.transcript,
     rawText: content.rawText,
-    fromEmail: parsed.from?.address || message.from || null,
+    fromEmail: parsed.from || message.from || null,
     receivedAt: new Date().toISOString(),
   };
 }

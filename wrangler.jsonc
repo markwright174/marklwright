@@ -1,0 +1,13 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "marklwright",
+  "compatibility_date": "2026-08-06",
+  "pages_build_output_dir": "dist",
+  "d1_databases": [
+    {
+      "binding": "STUDY_DB",
+      "database_name": "marklwright-study",
+      "database_id": "8e4606f0-fc17-45a3-a647-29d6de500265"
+    }
+  ]
+}

@@ -4,7 +4,7 @@
 CLOUDFLARE_API_TOKEN=
 CLOUDFLARE_ACCOUNT_ID=
 CLOUDFLARE_ZONE_ID=
-CLOUDFLARE_D1_DATABASE_ID=
+CLOUDFLARE_D1_DATABASE_ID=8e4606f0-fc17-45a3-a647-29d6de500265
 
 # Optional local reference for the Lily study Plaud importer.
 # The real value belongs in Cloudflare Pages environment variables/secrets.
