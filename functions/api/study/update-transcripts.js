@@ -218,7 +218,39 @@ async function getRecordingItem(env, workspaceToken, recording) {
   };
 }
 
+async function getD1Items(env) {
+  const result = await env.STUDY_DB.prepare(`
+    SELECT source_id, title, recorded_at, summary, transcript, received_at
+    FROM study_transcripts
+    ORDER BY received_at DESC
+    LIMIT 50
+  `).all();
+
+  return (result.results || []).map((row) => ({
+    sourceId: row.source_id,
+    title: row.title,
+    recordedAt: row.recorded_at || row.received_at,
+    text: row.transcript || '',
+    summary: row.summary || '',
+  }));
+}
+
 async function getPlaudItems(env) {
+  if (env.STUDY_DB) {
+    const items = await getD1Items(env);
+    return {
+      ok: true,
+      status: 200,
+      body: {
+        ok: true,
+        source: 'cloudflare-email-d1',
+        expectedRecipient: 'lily-notes@marklwright.com',
+        count: items.length,
+        items,
+      },
+    };
+  }
+
   const userToken = env.PLAUD_USER_TOKEN;
   if (!userToken) {
     return {
@@ -226,9 +258,10 @@ async function getPlaudItems(env) {
       status: 501,
       body: {
         ok: false,
-        code: 'PLAUD_TOKEN_MISSING',
-        message: 'Plaud import is wired, but PLAUD_USER_TOKEN has not been added to Cloudflare yet.',
+        code: 'STUDY_IMPORT_NOT_CONNECTED',
+        message: 'Study import is wired, but the D1 email import database has not been bound to this Pages project yet.',
         expectedDeviceSerial: LILY_PLAUD_SERIAL,
+        expectedRecipient: 'lily-notes@marklwright.com',
         items: [],
       },
     };
@@ -287,7 +320,12 @@ export async function onRequestGet({ env }) {
   return json({
     ok: true,
     service: 'study-transcript-import',
-    status: env.PLAUD_USER_TOKEN ? 'plaud-token-configured' : 'waiting-for-plaud-token',
+    status: env.STUDY_DB
+      ? 'cloudflare-email-d1-configured'
+      : env.PLAUD_USER_TOKEN
+        ? 'plaud-token-configured'
+        : 'waiting-for-d1-binding',
     expectedDeviceSerial: LILY_PLAUD_SERIAL,
+    expectedRecipient: 'lily-notes@marklwright.com',
   });
 }

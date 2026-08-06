@@ -6,22 +6,26 @@ The Lily study page calls:
 /api/study/update-transcripts
 ```
 
-The Cloudflare Pages Function filters Plaud recordings to Lily's recorder:
+The original direct-Plaud plan filtered recordings to Lily's recorder:
 
 ```text
 8810B30300523466
 ```
 
-Required Cloudflare environment variable:
+The current preferred path is:
 
-- `PLAUD_USER_TOKEN`
+```text
+Plaud AutoFlow email -> lily-notes@marklwright.com -> Cloudflare Email Worker -> D1 -> Study page
+```
 
-Optional Cloudflare environment variables:
+Required Cloudflare resources:
 
-- `PLAUD_WORKSPACE_ID`
-- `PLAUD_API_BASE`
+- D1 database: `marklwright-study`
+- D1 binding on the Pages project: `STUDY_DB`
+- D1 binding on the Email Worker: `STUDY_DB`
+- Email Routing rule for `lily-notes@marklwright.com` to Worker `lily-notes-email`
 
-The token should be the long-lived Plaud user token, not the short-lived workspace token. If the value starts working and then fails about a day later, it was probably the workspace token.
+The fallback direct-Plaud path still exists in the endpoint, but it should only be used if a reliable Plaud user token becomes available.
 
 The API returns items shaped for `assets/study.js`:
 
