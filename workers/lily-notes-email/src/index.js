@@ -6,6 +6,24 @@ function decodeHeader(value) {
     .replace(/=([a-f0-9]{2})/gi, (_match, hex) => String.fromCharCode(Number.parseInt(hex, 16))));
 }
 
+function decodeBase64(value) {
+  const clean = String(value || '').replace(/\s+/g, '');
+  if (!clean) return '';
+  try {
+    const binary = atob(clean);
+    const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+    return new TextDecoder().decode(bytes);
+  } catch {
+    return '';
+  }
+}
+
+function decodeQuotedPrintable(value) {
+  return String(value || '')
+    .replace(/=\n/g, '')
+    .replace(/=([a-f0-9]{2})/gi, (_match, hex) => String.fromCharCode(Number.parseInt(hex, 16)));
+}
+
 function parseRawEmail(rawText) {
   const normalized = rawText.replace(/\r\n/g, '\n');
   const [rawHeaders, ...bodyParts] = normalized.split('\n\n');
@@ -29,7 +47,62 @@ function parseRawEmail(rawText) {
     date: headers.date || '',
     messageId: headers['message-id'] || '',
     body: bodyParts.join('\n\n'),
+    contentType: headers['content-type'] || '',
   };
+}
+
+function parsePartHeaders(rawHeaders) {
+  const headers = {};
+  let lastKey = null;
+  for (const line of rawHeaders.split('\n')) {
+    if (/^\s/.test(line) && lastKey) {
+      headers[lastKey] += ` ${line.trim()}`;
+      continue;
+    }
+    const index = line.indexOf(':');
+    if (index === -1) continue;
+    lastKey = line.slice(0, index).trim().toLowerCase();
+    headers[lastKey] = line.slice(index + 1).trim();
+  }
+  return headers;
+}
+
+function getBoundary(contentType, body) {
+  const headerBoundary = contentType.match(/boundary="?([^";]+)"?/i)?.[1];
+  if (headerBoundary) return headerBoundary;
+  return body.match(/^--([^\n]+)$/m)?.[1]?.trim() || '';
+}
+
+function filenameFromDisposition(value) {
+  return String(value || '').match(/filename="?([^";]+)"?/i)?.[1] || '';
+}
+
+function decodePartBody(body, encoding) {
+  const normalizedEncoding = String(encoding || '').toLowerCase();
+  if (normalizedEncoding === 'base64') return decodeBase64(body);
+  if (normalizedEncoding === 'quoted-printable') return decodeQuotedPrintable(body);
+  return body.trim();
+}
+
+function parseMimeParts(parsed) {
+  const boundary = getBoundary(parsed.contentType, parsed.body);
+  if (!boundary) return [];
+  return parsed.body
+    .split(`--${boundary}`)
+    .map((part) => part.trim())
+    .filter((part) => part && part !== '--')
+    .map((part) => {
+      const [rawHeaders, ...bodyParts] = part.split('\n\n');
+      const headers = parsePartHeaders(rawHeaders);
+      const body = bodyParts.join('\n\n');
+      return {
+        contentType: headers['content-type'] || '',
+        disposition: headers['content-disposition'] || '',
+        transferEncoding: headers['content-transfer-encoding'] || '',
+        filename: filenameFromDisposition(headers['content-disposition']),
+        text: decodePartBody(body, headers['content-transfer-encoding']),
+      };
+    });
 }
 
 function stripHtml(html) {
@@ -48,6 +121,20 @@ function stripHtml(html) {
     .replace(/[ \t]+\n/g, '\n')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
+}
+
+function extractPlaudText(parsed) {
+  const parts = parseMimeParts(parsed);
+  const transcript = parts.find((part) => part.filename.toLowerCase() === 'transcript.txt')?.text || '';
+  const summary = parts.find((part) => part.filename.toLowerCase() === 'summary.txt')?.text || '';
+  const html = parts.find((part) => part.contentType.toLowerCase().includes('text/html'))?.text || '';
+  const text = parts.find((part) => part.contentType.toLowerCase().includes('text/plain'))?.text || '';
+
+  return {
+    summary,
+    transcript,
+    bodyText: text || stripHtml(html) || stripHtml(parsed.body),
+  };
 }
 
 function normalizeText(value) {
@@ -99,7 +186,8 @@ async function hashSourceId(value) {
 async function parseMessage(message) {
   const rawText = await new Response(message.raw).text();
   const parsed = parseRawEmail(rawText);
-  const bodyText = stripHtml(parsed.body);
+  const plaudText = extractPlaudText(parsed);
+  const bodyText = plaudText.bodyText;
   const content = parseStudyContent(bodyText);
   const sourceSeed = [
     parsed.messageId,
@@ -112,8 +200,8 @@ async function parseMessage(message) {
     sourceId: `email:${await hashSourceId(sourceSeed || crypto.randomUUID())}`,
     title: parsed.subject || 'Plaud class notes',
     recordedAt: parsed.date ? new Date(parsed.date).toISOString() : null,
-    summary: content.summary,
-    transcript: content.transcript,
+    summary: plaudText.summary || content.summary,
+    transcript: plaudText.transcript || content.transcript,
     rawText: content.rawText,
     fromEmail: parsed.from || message.from || null,
     receivedAt: new Date().toISOString(),
