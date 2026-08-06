@@ -2,6 +2,60 @@
   background:#f7f6f1;
 }
 
+.study-gated .study-shell{
+  display:none;
+}
+
+.study-access-gate{
+  display:grid;
+  min-height:100vh;
+  place-items:center;
+  padding:24px;
+}
+
+.study-access-card{
+  display:grid;
+  width:min(420px, 100%);
+  gap:12px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:26px;
+  background:#fff;
+  box-shadow:var(--shadow);
+}
+
+.study-access-card h1{
+  margin:0;
+  font-size:2rem;
+  line-height:1.1;
+}
+
+.study-access-card p{
+  margin:0;
+  color:var(--muted);
+}
+
+.study-access-card label{
+  font-weight:800;
+}
+
+.study-access-card input{
+  width:100%;
+  min-height:44px;
+  border:1px solid var(--line);
+  border-radius:4px;
+  padding:0 12px;
+  color:var(--text);
+  background:#fff;
+  font:inherit;
+}
+
+.study-access-card .study-access-error{
+  min-height:1.4em;
+  color:#9b2c2c;
+  font-weight:700;
+}
+
 .study-shell{
   width:min(1180px, calc(100% - 32px));
   margin:0 auto;

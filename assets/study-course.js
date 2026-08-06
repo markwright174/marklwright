@@ -126,7 +126,7 @@ function renderChat() {
     try {
       const response = await fetch('/api/study/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...window.getStudyAccessHeaders() },
         body: JSON.stringify({
           mode: selectedMode,
           question,

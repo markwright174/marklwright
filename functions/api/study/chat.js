@@ -3,6 +3,7 @@ const DAILY_REQUEST_LIMIT = 25;
 const MAX_QUESTION_CHARS = 700;
 const MAX_CONTEXT_CHARS = 4500;
 const MAX_COMPLETION_TOKENS = 450;
+const STUDY_ACCESS_CODE = 'lily-study';
 
 function json(data, init = {}) {
   return Response.json(data, {
@@ -20,6 +21,10 @@ function todayKey() {
 
 function cleanText(value, limit) {
   return String(value || '').replace(/\s+/g, ' ').trim().slice(0, limit);
+}
+
+function hasStudyAccess(request) {
+  return request.headers.get('X-Study-Access') === STUDY_ACCESS_CODE;
 }
 
 async function getUsage(env, usageDate) {
@@ -73,6 +78,17 @@ function getAiText(result) {
 }
 
 export async function onRequestPost({ request, env }) {
+  if (!hasStudyAccess(request)) {
+    return json(
+      {
+        ok: false,
+        code: 'STUDY_ACCESS_REQUIRED',
+        message: 'Open the Study page with the family password first.',
+      },
+      { status: 401 },
+    );
+  }
+
   if (!env.AI) {
     return json(
       {
@@ -175,7 +191,18 @@ export async function onRequestPost({ request, env }) {
   });
 }
 
-export async function onRequestGet({ env }) {
+export async function onRequestGet({ request, env }) {
+  if (!hasStudyAccess(request)) {
+    return json(
+      {
+        ok: false,
+        code: 'STUDY_ACCESS_REQUIRED',
+        message: 'Open the Study page with the family password first.',
+      },
+      { status: 401 },
+    );
+  }
+
   const usageDate = todayKey();
   const usage = await getUsage(env, usageDate);
   return json({

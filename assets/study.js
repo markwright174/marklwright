@@ -235,7 +235,7 @@ function renderFrontStudyChat() {
     try {
       const response = await fetch('/api/study/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...window.getStudyAccessHeaders() },
         body: JSON.stringify({
           scope: 'general',
           mode: selectedMode,
@@ -272,7 +272,7 @@ updateTranscripts.addEventListener('click', async () => {
   try {
     const response = await fetch('/api/study/update-transcripts', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...window.getStudyAccessHeaders() },
       body: JSON.stringify({ source: 'study-page' }),
     });
     const result = await response.json();
