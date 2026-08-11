@@ -1,5 +1,9 @@
 const courseClasses = [
-  { id: 'class-a', name: 'Theatre Arts' },
+  {
+    id: 'class-a',
+    name: 'Theatre Arts',
+    driveFolderId: '1HvCY9j3GyUiSlc4bNu-WuW9HWlDnoDck',
+  },
   { id: 'class-b', name: 'US History' },
   { id: 'class-c', name: 'Fundamentals of Computer Science' },
   { id: 'class-d', name: 'Science' },
@@ -20,6 +24,7 @@ const title = document.querySelector('#courseTitle');
 const count = document.querySelector('#courseCount');
 const list = document.querySelector('#courseRecordings');
 const chat = document.querySelector('#studyChat');
+const driveMaterials = document.querySelector('#courseDriveMaterials');
 
 function getSaved() {
   try {
@@ -265,6 +270,32 @@ function renderChat() {
   });
 }
 
+function renderDriveMaterials() {
+  if (!driveMaterials) return;
+
+  if (!course.driveFolderId) {
+    driveMaterials.innerHTML = `
+      <div class="drive-empty">
+        <p class="meta">Google Drive</p>
+        <h3>No folder connected yet</h3>
+        <p>When this course has a shared Google Drive folder, its materials will appear here.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const folderUrl = `https://drive.google.com/drive/folders/${encodeURIComponent(course.driveFolderId)}`;
+  const embedUrl = `https://drive.google.com/embeddedfolderview?id=${encodeURIComponent(course.driveFolderId)}#list`;
+  driveMaterials.innerHTML = `
+    <div class="drive-actions">
+      <a class="button primary" href="${folderUrl}" target="_blank" rel="noopener">New</a>
+      <a class="button secondary" href="${folderUrl}" target="_blank" rel="noopener">Open folder</a>
+    </div>
+    <iframe class="drive-frame" src="${embedUrl}" title="${escapeHtml(course.name)} Google Drive folder"></iframe>
+  `;
+}
+
 clearRetiredTestItems();
 renderCourse();
 renderChat();
+renderDriveMaterials();
