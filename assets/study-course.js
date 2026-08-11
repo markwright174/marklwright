@@ -4,13 +4,37 @@ const courseClasses = [
     name: 'Theatre Arts',
     driveFolderId: '1HvCY9j3GyUiSlc4bNu-WuW9HWlDnoDck',
   },
-  { id: 'class-b', name: 'US History' },
+  {
+    id: 'class-b',
+    name: 'US History',
+    driveFolderId: '1jZliIZU2o_Ax0npuK43W5RPXg4NzyLxt',
+  },
   { id: 'class-c', name: 'Fundamentals of Computer Science' },
-  { id: 'class-d', name: 'Science' },
-  { id: 'class-e', name: 'English' },
-  { id: 'class-f', name: 'PE/Health' },
-  { id: 'class-g', name: 'Exploring Science' },
-  { id: 'class-h', name: 'Algebra 1' },
+  {
+    id: 'class-d',
+    name: 'Science',
+    driveFolderId: '1ySgqjEJ2Sgh1gxgYr_OfhYEQyu2hUc4K',
+  },
+  {
+    id: 'class-e',
+    name: 'English',
+    driveFolderId: '1R0twGMKA9T-vEI5AZnJzKzsFqf06ppid',
+  },
+  {
+    id: 'class-f',
+    name: 'PE/Health',
+    driveFolderId: '1hTeGGuBGWBKGq95iuf-QERGDCQHojx5v',
+  },
+  {
+    id: 'class-g',
+    name: 'Exploring Science',
+    driveFolderId: '12B5q4Sd1bDIeChfzc1_fAdbaXD-pAolV',
+  },
+  {
+    id: 'class-h',
+    name: 'Algebra 1',
+    driveFolderId: '1216wA1OcXDl4uebAN-F-hvhOyv5OUNA0',
+  },
 ];
 
 const courseStorageKey = 'studyWorkspaceTranscripts';
