@@ -85,14 +85,14 @@ function getRecordingDateLabel(item) {
 function getEmptyMaterialsMessage() {
   return `
     <div class="detail-head">
-      <p class="meta">Ready for materials</p>
+      <p class="meta">Recording details</p>
       <h3>No recording selected</h3>
     </div>
     <div class="detail-scroll">
-      <h4>How this area will work</h4>
-      <p>Recordings, summaries, and transcripts for ${escapeHtml(course.name)} will appear in the list on the left. Select one to read the summary and transcript here without stretching the whole page.</p>
-      <h4>Other course materials</h4>
-      <p>This page can also hold study guides, assignments, vocabulary, review questions, and notes that are not tied to a Plaud recording.</p>
+      <h4>Summary</h4>
+      <p>When a recording is selected, its summary will appear here.</p>
+      <h4>Transcript</h4>
+      <p>The full transcript will appear in this scrollable panel so longer recordings do not change the page shape.</p>
     </div>
   `;
 }
@@ -165,9 +165,28 @@ function renderChat() {
 
   if (!items.length) {
     chat.innerHTML = `
-      <div class="empty-helper-panel">
-        <h3>Study helper is ready</h3>
-        <p>After a recording is saved to this class, the helper can use that transcript as context. For general questions, use the helper on the Study home page.</p>
+      <div class="chat-controls">
+        <label for="chatRecording">Use recording</label>
+        <select id="chatRecording" disabled>
+          <option>No recordings saved yet</option>
+        </select>
+
+        <div class="mode-row" aria-label="Study actions">
+          <button class="button secondary active" type="button" disabled>Explain</button>
+          <button class="button secondary" type="button" disabled>Quiz me</button>
+          <button class="button secondary" type="button" disabled>Key terms</button>
+          <button class="button secondary" type="button" disabled>Find info</button>
+          <button class="button secondary" type="button" disabled>Audio review</button>
+        </div>
+
+        <label for="chatQuestion">Question</label>
+        <textarea id="chatQuestion" rows="4" placeholder="Course-specific help will be available after a recording is saved here." disabled></textarea>
+        <button class="button primary" type="button" disabled>Ask study helper</button>
+        <p class="chat-status">Waiting for a course recording.</p>
+      </div>
+      <div class="chat-answer" aria-live="polite">
+        <h3>Class helper ready</h3>
+        <p>After a recording is saved to ${escapeHtml(course.name)}, this helper can use that transcript as context. General questions can still go through the helper on the Study home page.</p>
       </div>
     `;
     return;

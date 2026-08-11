@@ -372,24 +372,18 @@
   overflow:auto;
 }
 
-.empty-list-panel,
-.empty-helper-panel,
-.workspace-placeholder{
+.empty-list-panel{
   border:1px dashed var(--line);
   border-radius:8px;
   padding:18px;
   background:#fff;
 }
 
-.empty-list-panel h3,
-.empty-helper-panel h3,
-.workspace-placeholder h3{
+.empty-list-panel h3{
   margin:0 0 8px;
 }
 
-.empty-list-panel p,
-.empty-helper-panel p,
-.workspace-placeholder p{
+.empty-list-panel p{
   margin:0;
   color:var(--muted);
 }
@@ -466,13 +460,6 @@
 
 .saved-card{
   padding:18px;
-}
-
-.course-placeholder-grid{
-  display:grid;
-  grid-template-columns:repeat(2, minmax(0, 1fr));
-  gap:14px;
-  max-width:1120px;
 }
 
 .saved-card h3{
@@ -617,7 +604,6 @@
   .intake-workbench,
   .study-chat,
   .course-workbench,
-  .course-placeholder-grid,
   .class-day-grid,
   .saved-list,
   .plaud-box{
