@@ -143,7 +143,6 @@ function renderClasses() {
       card.href = klass.href;
       card.innerHTML = `
         <div>
-          <p class="meta">${klass.slot}</p>
           <h3>${klass.name}</h3>
           <p>${klass.note}</p>
           <p class="class-count">${count} recording${count === 1 ? '' : 's'}</p>
