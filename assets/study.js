@@ -11,6 +11,9 @@ const defaultClasses = [
 
 const storageKey = 'studyWorkspaceTranscripts';
 const selectedRecordingKey = 'studyWorkspaceSelectedRecording';
+const retiredTestSourceIds = new Set([
+  'email:3eacc7add5bddd8785577eed56f1bd06bbc40125b78c5ef04a0e7418ce215928',
+]);
 const classGrid = document.querySelector('#classGrid');
 const intakeList = document.querySelector('#intakeList');
 const recordingPreview = document.querySelector('#recordingPreview');
@@ -23,6 +26,22 @@ function getSaved() {
     return JSON.parse(localStorage.getItem(storageKey)) || [];
   } catch {
     return [];
+  }
+}
+
+function isRetiredTestItem(item) {
+  return retiredTestSourceIds.has(item?.sourceId)
+    || String(item?.title || '').startsWith('[Plaud-AutoFlow] 2026-08-06 11:52:36');
+}
+
+function clearRetiredTestItems() {
+  const items = getSaved();
+  const filtered = items.filter((item) => !isRetiredTestItem(item));
+  if (filtered.length === items.length) return;
+  setSaved(filtered);
+  const selectedId = localStorage.getItem(selectedRecordingKey);
+  if (!filtered.some((item) => item.id === selectedId)) {
+    setSelectedItem(null);
   }
 }
 
@@ -337,5 +356,6 @@ updateTranscripts.addEventListener('click', async () => {
   }
 });
 
+clearRetiredTestItems();
 renderAll();
 renderFrontStudyChat();

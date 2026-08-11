@@ -10,6 +10,9 @@ const courseClasses = [
 ];
 
 const courseStorageKey = 'studyWorkspaceTranscripts';
+const retiredTestSourceIds = new Set([
+  'email:3eacc7add5bddd8785577eed56f1bd06bbc40125b78c5ef04a0e7418ce215928',
+]);
 const courseId = document.body.dataset.course;
 const course = courseClasses.find((entry) => entry.id === courseId) || courseClasses[0];
 const title = document.querySelector('#courseTitle');
@@ -22,6 +25,23 @@ function getSaved() {
     return JSON.parse(localStorage.getItem(courseStorageKey)) || [];
   } catch {
     return [];
+  }
+}
+
+function setSaved(items) {
+  localStorage.setItem(courseStorageKey, JSON.stringify(items));
+}
+
+function isRetiredTestItem(item) {
+  return retiredTestSourceIds.has(item?.sourceId)
+    || String(item?.title || '').startsWith('[Plaud-AutoFlow] 2026-08-06 11:52:36');
+}
+
+function clearRetiredTestItems() {
+  const items = getSaved();
+  const filtered = items.filter((item) => !isRetiredTestItem(item));
+  if (filtered.length !== items.length) {
+    setSaved(filtered);
   }
 }
 
@@ -152,5 +172,6 @@ function renderChat() {
   });
 }
 
+clearRetiredTestItems();
 renderCourse();
 renderChat();
