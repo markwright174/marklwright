@@ -1,10 +1,12 @@
 const courseClasses = [
-  { id: 'class-a', name: 'Class A' },
-  { id: 'class-b', name: 'Class B' },
-  { id: 'class-c', name: 'Class C' },
-  { id: 'class-d', name: 'Class D' },
-  { id: 'class-e', name: 'Class E' },
-  { id: 'class-f', name: 'Class F' },
+  { id: 'class-a', name: 'Theatre Arts' },
+  { id: 'class-b', name: 'US History' },
+  { id: 'class-c', name: 'Fundamentals of Computer Science' },
+  { id: 'class-d', name: 'Science' },
+  { id: 'class-e', name: 'English' },
+  { id: 'class-f', name: 'PE/Health' },
+  { id: 'class-g', name: 'Exploring Science' },
+  { id: 'class-h', name: 'Algebra 1' },
 ];
 
 const courseStorageKey = 'studyWorkspaceTranscripts';

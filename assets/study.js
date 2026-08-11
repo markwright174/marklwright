@@ -1,10 +1,12 @@
 const defaultClasses = [
-  { id: 'class-a', name: 'Class A', note: 'Rename when the schedule arrives.', href: '/study/class-a/' },
-  { id: 'class-b', name: 'Class B', note: 'Keep recordings, notes, and review questions together.', href: '/study/class-b/' },
-  { id: 'class-c', name: 'Class C', note: 'Good for lectures, labs, or class discussions.', href: '/study/class-c/' },
-  { id: 'class-d', name: 'Class D', note: 'Use this as a parking place until subjects are known.', href: '/study/class-d/' },
-  { id: 'class-e', name: 'Class E', note: 'Save transcript work without needing perfect notes first.', href: '/study/class-e/' },
-  { id: 'class-f', name: 'Class F', note: 'Optional sixth class or study hall support.', href: '/study/class-f/' },
+  { id: 'class-a', day: 'A Days', slot: 'A1', name: 'Theatre Arts', note: 'Monday, Wednesday, Friday', href: '/study/class-a/' },
+  { id: 'class-b', day: 'A Days', slot: 'A2', name: 'US History', note: 'Monday, Wednesday, Friday', href: '/study/class-b/' },
+  { id: 'class-c', day: 'A Days', slot: 'A3', name: 'Fundamentals of Computer Science', note: 'Monday, Wednesday, Friday', href: '/study/class-c/' },
+  { id: 'class-d', day: 'A Days', slot: 'A4', name: 'Science', note: 'Monday, Wednesday, Friday', href: '/study/class-d/' },
+  { id: 'class-e', day: 'B Days', slot: 'B1', name: 'English', note: 'Tuesday, Thursday, Friday', href: '/study/class-e/' },
+  { id: 'class-f', day: 'B Days', slot: 'B2', name: 'PE/Health', note: 'Tuesday, Thursday, Friday', href: '/study/class-f/' },
+  { id: 'class-g', day: 'B Days', slot: 'B3', name: 'Exploring Science', note: 'Tuesday, Thursday, Friday', href: '/study/class-g/' },
+  { id: 'class-h', day: 'B Days', slot: 'B4', name: 'Algebra 1', note: 'Tuesday, Thursday, Friday', href: '/study/class-h/' },
 ];
 
 const storageKey = 'studyWorkspaceTranscripts';
@@ -122,21 +124,36 @@ function renderClasses() {
   const items = getSaved();
   classGrid.innerHTML = '';
 
-  defaultClasses.forEach((klass) => {
-    const count = items.filter((item) => item.classId === klass.id).length;
-    const card = document.createElement('a');
-    card.className = 'class-card';
-    card.href = klass.href;
-    card.innerHTML = `
-      <div>
-        <p class="meta">${klass.id.replace('-', ' ')}</p>
-        <h3>${klass.name}</h3>
-        <p>${klass.note}</p>
-        <p class="class-count">${count} recording${count === 1 ? '' : 's'}</p>
+  ['A Days', 'B Days'].forEach((day) => {
+    const group = document.createElement('section');
+    group.className = 'class-day-group';
+    group.innerHTML = `
+      <div class="class-day-head">
+        <h3>${day}</h3>
+        <p>${day === 'A Days' ? 'Monday, Wednesday, Friday' : 'Tuesday, Thursday, Friday'}</p>
       </div>
-      <span class="button secondary">Open course</span>
+      <div class="class-day-grid"></div>
     `;
-    classGrid.append(card);
+    const grid = group.querySelector('.class-day-grid');
+
+    defaultClasses.filter((klass) => klass.day === day).forEach((klass) => {
+      const count = items.filter((item) => item.classId === klass.id).length;
+      const card = document.createElement('a');
+      card.className = 'class-card';
+      card.href = klass.href;
+      card.innerHTML = `
+        <div>
+          <p class="meta">${klass.slot}</p>
+          <h3>${klass.name}</h3>
+          <p>${klass.note}</p>
+          <p class="class-count">${count} recording${count === 1 ? '' : 's'}</p>
+        </div>
+        <span class="button secondary">Open course</span>
+      `;
+      grid.append(card);
+    });
+
+    classGrid.append(group);
   });
 }
 
