@@ -79,6 +79,10 @@ function createStoredItem(item, existingItem = {}) {
   };
 }
 
+function isCloudEmailImport(item) {
+  return String(item?.sourceId || '').startsWith('email:');
+}
+
 function escapeHtml(value) {
   return String(value).replace(/[&<>"']/g, (character) => ({
     '&': '&amp;',
@@ -318,15 +322,12 @@ updateTranscripts.addEventListener('click', async () => {
     }
 
     const incoming = Array.isArray(result.items) ? result.items : [];
-    if (!incoming.length) {
-      plaudStatus.textContent = 'No new Lily recordings were ready to import.';
-      return;
-    }
-
     const saved = getSaved();
-    const existingBySourceId = new Map(saved.map((item) => [item.sourceId, item]).filter(([sourceId]) => sourceId));
     const incomingBySourceId = new Map(incoming.filter((item) => item.sourceId).map((item) => [item.sourceId, item]));
-    const updatedItems = saved.map((item) => {
+    const reconciledSaved = saved.filter((item) => !isCloudEmailImport(item) || incomingBySourceId.has(item.sourceId));
+    const staleCount = saved.length - reconciledSaved.length;
+    const existingBySourceId = new Map(reconciledSaved.map((item) => [item.sourceId, item]).filter(([sourceId]) => sourceId));
+    const updatedItems = reconciledSaved.map((item) => {
       const incomingItem = incomingBySourceId.get(item.sourceId);
       return incomingItem ? createStoredItem(incomingItem, item) : item;
     });
@@ -334,18 +335,29 @@ updateTranscripts.addEventListener('click', async () => {
       .filter((item) => item.sourceId && !existingBySourceId.has(item.sourceId))
       .map((item) => createStoredItem(item));
 
-    if (!newItems.length && !incomingBySourceId.size) {
+    if (!incoming.length && !staleCount) {
+      plaudStatus.textContent = 'No new Lily recordings were ready to import.';
+      return;
+    }
+
+    if (!newItems.length && incomingBySourceId.size && !staleCount) {
       plaudStatus.textContent = 'Everything Plaud returned is already in the sorting list.';
       return;
     }
 
     setSaved([...updatedItems, ...newItems]);
+    const selectedId = localStorage.getItem(selectedRecordingKey);
+    if (selectedId && ![...updatedItems, ...newItems].some((item) => item.id === selectedId)) {
+      setSelectedItem(null);
+    }
     if (newItems.length) {
       setSelectedItem(newItems[0].id);
     }
     renderAll();
     if (newItems.length) {
       plaudStatus.textContent = `Added ${newItems.length} recording${newItems.length === 1 ? '' : 's'} to the sorting list.`;
+    } else if (staleCount) {
+      plaudStatus.textContent = `Removed ${staleCount} old recording${staleCount === 1 ? '' : 's'} that are no longer in Cloudflare.`;
     } else {
       plaudStatus.textContent = `Updated ${incomingBySourceId.size} existing recording${incomingBySourceId.size === 1 ? '' : 's'}.`;
     }
