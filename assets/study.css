@@ -63,10 +63,7 @@
 }
 
 .study-hero{
-  display:grid;
-  grid-template-columns:minmax(0, 1fr) minmax(260px, 360px);
-  gap:18px;
-  align-items:end;
+  max-width:860px;
   padding:18px 0 20px;
 }
 
@@ -78,7 +75,6 @@
   letter-spacing:0;
 }
 
-.study-status,
 .study-panel,
 .class-card,
 .saved-card{
@@ -88,11 +84,6 @@
   box-shadow:var(--shadow);
 }
 
-.study-status{
-  padding:18px;
-}
-
-.study-status p:last-child,
 .study-panel p,
 .saved-card p{
   color:var(--muted);
@@ -189,11 +180,6 @@
 .plaud-device{
   color:var(--muted);
   font-size:.95rem;
-}
-
-.plaud-device code{
-  color:var(--accent-strong);
-  font-weight:800;
 }
 
 .plaud-status{
