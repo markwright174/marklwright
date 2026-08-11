@@ -14,6 +14,7 @@ const retiredTestSourceIds = new Set([
   'email:3eacc7add5bddd8785577eed56f1bd06bbc40125b78c5ef04a0e7418ce215928',
 ]);
 const courseId = document.body.dataset.course;
+const selectedCourseRecordingKey = `studyWorkspaceSelectedRecording:${courseId}`;
 const course = courseClasses.find((entry) => entry.id === courseId) || courseClasses[0];
 const title = document.querySelector('#courseTitle');
 const count = document.querySelector('#courseCount');
@@ -60,8 +61,30 @@ function escapeHtml(value) {
   }[character]));
 }
 
+function getCourseItems() {
+  return getSaved().filter((item) => item.classId === course.id).slice().reverse();
+}
+
+function getSelectedCourseItem(items) {
+  const selectedId = localStorage.getItem(selectedCourseRecordingKey);
+  return items.find((item) => item.id === selectedId) || items[0] || null;
+}
+
+function setSelectedCourseItem(itemId) {
+  if (itemId) {
+    localStorage.setItem(selectedCourseRecordingKey, itemId);
+  } else {
+    localStorage.removeItem(selectedCourseRecordingKey);
+  }
+}
+
+function getRecordingDateLabel(item) {
+  return item.recordedAt ? new Date(item.recordedAt).toLocaleDateString() : 'Recording';
+}
+
 function renderCourse() {
-  const items = getSaved().filter((item) => item.classId === course.id).slice().reverse();
+  const items = getCourseItems();
+  const selected = getSelectedCourseItem(items);
   title.textContent = course.name;
   count.textContent = `${items.length} recording${items.length === 1 ? '' : 's'} saved here`;
   list.innerHTML = '';
@@ -71,23 +94,50 @@ function renderCourse() {
     return;
   }
 
-  items.forEach((item) => {
-    const card = document.createElement('article');
-    card.className = 'saved-card course-recording';
-    card.innerHTML = `
-      <p class="meta">${item.recordedAt ? new Date(item.recordedAt).toLocaleDateString() : 'Recording'}</p>
-      <h3>${escapeHtml(item.title)}</h3>
-      <h4>Summary</h4>
-      <p>${escapeHtml(getPreview(item.summary || 'No Plaud summary is saved for this recording yet.'))}</p>
-      <h4>Transcript glance</h4>
-      <p>${escapeHtml(getPreview(item.text || 'No transcript text is saved for this recording yet.'))}</p>
-    `;
-    list.append(card);
-  });
-}
+  list.classList.remove('single-column');
+  list.classList.add('course-workbench');
+  list.innerHTML = `
+    <div class="course-recording-list" aria-label="Recordings"></div>
+    <article class="course-recording-detail" aria-live="polite"></article>
+  `;
 
-function getCourseItems() {
-  return getSaved().filter((item) => item.classId === course.id).slice().reverse();
+  const recordingList = list.querySelector('.course-recording-list');
+  const detail = list.querySelector('.course-recording-detail');
+
+  items.forEach((item) => {
+    const button = document.createElement('button');
+    button.className = `course-recording-button${selected && selected.id === item.id ? ' active' : ''}`;
+    button.type = 'button';
+    button.dataset.recordingId = item.id;
+    button.innerHTML = `
+      <span class="meta">${getRecordingDateLabel(item)}</span>
+      <strong>${escapeHtml(item.title)}</strong>
+      <span>${escapeHtml(item.summary ? getPreview(item.summary, 120) : getPreview(item.text, 120))}</span>
+    `;
+    recordingList.append(button);
+  });
+
+  if (!selected) return;
+
+  detail.innerHTML = `
+    <div class="detail-head">
+      <p class="meta">${getRecordingDateLabel(selected)}</p>
+      <h3>${escapeHtml(selected.title)}</h3>
+    </div>
+    <div class="detail-scroll">
+      <h4>Summary</h4>
+      <p>${escapeHtml(selected.summary || 'No Plaud summary is saved for this recording yet.')}</p>
+      <h4>Transcript</h4>
+      <p>${escapeHtml(selected.text || 'No transcript text is saved for this recording yet.')}</p>
+    </div>
+  `;
+
+  recordingList.addEventListener('click', (event) => {
+    const button = event.target.closest('button[data-recording-id]');
+    if (!button) return;
+    setSelectedCourseItem(button.dataset.recordingId);
+    renderCourse();
+  });
 }
 
 function renderChat() {

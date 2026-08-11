@@ -356,6 +356,90 @@
   grid-template-columns:minmax(0, 880px);
 }
 
+.course-workbench{
+  display:grid;
+  grid-template-columns:minmax(220px, 320px) minmax(0, 1fr);
+  gap:14px;
+  max-width:1120px;
+}
+
+.course-recording-list{
+  display:grid;
+  align-content:start;
+  gap:10px;
+  max-height:560px;
+  overflow:auto;
+}
+
+.course-recording-button{
+  display:grid;
+  gap:5px;
+  width:100%;
+  min-height:92px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:14px;
+  color:var(--text);
+  background:#fff;
+  font:inherit;
+  text-align:left;
+  cursor:pointer;
+}
+
+.course-recording-button:hover,
+.course-recording-button.active{
+  border-color:var(--accent);
+  background:#f7fbfc;
+}
+
+.course-recording-button strong{
+  line-height:1.25;
+}
+
+.course-recording-button span:last-child{
+  color:var(--muted);
+  font-size:.92rem;
+}
+
+.course-recording-detail{
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:#fff;
+  box-shadow:var(--shadow);
+}
+
+.detail-head{
+  padding:18px 18px 12px;
+  border-bottom:1px solid var(--line);
+}
+
+.detail-head h3{
+  margin:0;
+  font-size:1.55rem;
+  line-height:1.2;
+}
+
+.detail-scroll{
+  max-height:520px;
+  overflow:auto;
+  padding:18px;
+}
+
+.detail-scroll h4{
+  margin:18px 0 6px;
+  font-size:1rem;
+}
+
+.detail-scroll h4:first-child{
+  margin-top:0;
+}
+
+.detail-scroll p{
+  margin:0;
+  color:var(--muted);
+  white-space:pre-wrap;
+}
+
 .saved-card{
   padding:18px;
 }
@@ -501,6 +585,7 @@
   .study-layout,
   .intake-workbench,
   .study-chat,
+  .course-workbench,
   .class-day-grid,
   .saved-list,
   .plaud-box{
