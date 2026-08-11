@@ -82,18 +82,27 @@ function getRecordingDateLabel(item) {
   return item.recordedAt ? new Date(item.recordedAt).toLocaleDateString() : 'Recording';
 }
 
+function getEmptyMaterialsMessage() {
+  return `
+    <div class="detail-head">
+      <p class="meta">Ready for materials</p>
+      <h3>No recording selected</h3>
+    </div>
+    <div class="detail-scroll">
+      <h4>How this area will work</h4>
+      <p>Recordings, summaries, and transcripts for ${escapeHtml(course.name)} will appear in the list on the left. Select one to read the summary and transcript here without stretching the whole page.</p>
+      <h4>Other course materials</h4>
+      <p>This page can also hold study guides, assignments, vocabulary, review questions, and notes that are not tied to a Plaud recording.</p>
+    </div>
+  `;
+}
+
 function renderCourse() {
   const items = getCourseItems();
   const selected = getSelectedCourseItem(items);
   title.textContent = course.name;
   count.textContent = `${items.length} recording${items.length === 1 ? '' : 's'} saved here`;
   list.innerHTML = '';
-
-  if (!items.length) {
-    list.innerHTML = '<p class="study-note">No recordings have been sent to this class yet.</p>';
-    return;
-  }
-
   list.classList.remove('single-column');
   list.classList.add('course-workbench');
   list.innerHTML = `
@@ -103,6 +112,18 @@ function renderCourse() {
 
   const recordingList = list.querySelector('.course-recording-list');
   const detail = list.querySelector('.course-recording-detail');
+
+  if (!items.length) {
+    recordingList.innerHTML = `
+      <div class="empty-list-panel">
+        <p class="meta">Recordings</p>
+        <h3>No recordings yet</h3>
+        <p>When a recording is sent to ${escapeHtml(course.name)}, it will show up here.</p>
+      </div>
+    `;
+    detail.innerHTML = getEmptyMaterialsMessage();
+    return;
+  }
 
   items.forEach((item) => {
     const button = document.createElement('button');
@@ -116,8 +137,6 @@ function renderCourse() {
     `;
     recordingList.append(button);
   });
-
-  if (!selected) return;
 
   detail.innerHTML = `
     <div class="detail-head">
@@ -145,7 +164,12 @@ function renderChat() {
   if (!chat) return;
 
   if (!items.length) {
-    chat.innerHTML = '<p class="study-note">Send a recording to this class before using the study helper.</p>';
+    chat.innerHTML = `
+      <div class="empty-helper-panel">
+        <h3>Study helper is ready</h3>
+        <p>After a recording is saved to this class, the helper can use that transcript as context. For general questions, use the helper on the Study home page.</p>
+      </div>
+    `;
     return;
   }
 
