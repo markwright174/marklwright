@@ -126,8 +126,14 @@ function stripHtml(html) {
 
 function extractPlaudText(parsed) {
   const parts = parseMimeParts(parsed);
-  const transcript = parts.find((part) => part.filename.toLowerCase() === 'transcript.txt')?.text || '';
-  const summary = parts.find((part) => part.filename.toLowerCase() === 'summary.txt')?.text || '';
+  const transcript = parts.find((part) => {
+    const filename = part.filename.toLowerCase();
+    return filename === 'transcript.txt' || filename.includes('transcript') || filename.includes('transcription');
+  })?.text || '';
+  const summary = parts.find((part) => {
+    const filename = part.filename.toLowerCase();
+    return filename === 'summary.txt' || filename.includes('summary') || filename.includes('notes');
+  })?.text || '';
   const html = parts.find((part) => part.contentType.toLowerCase().includes('text/html'))?.text || '';
   const text = parts.find((part) => part.contentType.toLowerCase().includes('text/plain'))?.text || '';
 
@@ -164,7 +170,7 @@ function parseStudyContent(text) {
   const transcript = sectionAfterLabel(cleaned, ['Transcript', 'Transcription']);
 
   return {
-    summary: summary || cleaned.slice(0, 4000),
+    summary,
     transcript: transcript || cleaned,
     rawText: cleaned,
     hasLabeledSummary: Boolean(summary),

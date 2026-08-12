@@ -40,6 +40,7 @@ const courseClasses = [
 const courseStorageKey = 'studyWorkspaceTranscripts';
 const retiredTestSourceIds = new Set([
   'email:3eacc7add5bddd8785577eed56f1bd06bbc40125b78c5ef04a0e7418ce215928',
+  'email:020dfd355bc419b3608364de78299a5f83236a5eb69bc662f9c9812a8b6a862d:summary',
 ]);
 const courseId = document.body.dataset.course;
 const selectedCourseRecordingKey = `studyWorkspaceSelectedRecording:${courseId}`;

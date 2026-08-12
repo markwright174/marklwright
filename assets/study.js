@@ -13,6 +13,7 @@ const storageKey = 'studyWorkspaceTranscripts';
 const selectedRecordingKey = 'studyWorkspaceSelectedRecording';
 const retiredTestSourceIds = new Set([
   'email:3eacc7add5bddd8785577eed56f1bd06bbc40125b78c5ef04a0e7418ce215928',
+  'email:020dfd355bc419b3608364de78299a5f83236a5eb69bc662f9c9812a8b6a862d:summary',
 ]);
 const classGrid = document.querySelector('#classGrid');
 const intakeList = document.querySelector('#intakeList');
@@ -96,6 +97,10 @@ function createStoredItem(item, existingItem = {}) {
 
 function isCloudEmailImport(item) {
   return String(item?.sourceId || '').startsWith('email:');
+}
+
+function isSortedItem(item) {
+  return Boolean(item?.classId && item.classId !== 'unassigned');
 }
 
 function escapeHtml(value) {
@@ -339,7 +344,9 @@ updateTranscripts.addEventListener('click', async () => {
     const incoming = Array.isArray(result.items) ? result.items : [];
     const saved = getSaved();
     const incomingBySourceId = new Map(incoming.filter((item) => item.sourceId).map((item) => [item.sourceId, item]));
-    const reconciledSaved = saved.filter((item) => !isCloudEmailImport(item) || incomingBySourceId.has(item.sourceId));
+    const reconciledSaved = saved.filter((item) => (
+      !isCloudEmailImport(item) || incomingBySourceId.has(item.sourceId) || isSortedItem(item)
+    ));
     const staleCount = saved.length - reconciledSaved.length;
     const existingBySourceId = new Map(reconciledSaved.map((item) => [item.sourceId, item]).filter(([sourceId]) => sourceId));
     const updatedItems = reconciledSaved.map((item) => {
