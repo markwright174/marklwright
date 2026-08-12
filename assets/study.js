@@ -209,6 +209,12 @@ function renderClasses() {
 
     classGrid.append(group);
   });
+
+  const trashLink = document.createElement('a');
+  trashLink.className = 'class-card utility-link';
+  trashLink.href = '/study/trash/';
+  trashLink.innerHTML = '<h3>Trash</h3>';
+  classGrid.append(trashLink);
 }
 
 function renderIntakeList() {

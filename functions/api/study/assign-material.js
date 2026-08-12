@@ -25,12 +25,22 @@ export async function onRequestPost({ request, env }) {
 
   const body = await request.json().catch(() => ({}));
   const sourceId = String(body.sourceId || '').trim();
+  const action = String(body.action || '').trim();
+  const deleteForever = body.deleteForever === true || String(body.deleteForever || '').toLowerCase() === 'true';
   const hasClassId = Object.prototype.hasOwnProperty.call(body, 'classId');
   const classId = String(body.classId || 'unassigned').trim();
   const title = typeof body.title === 'string' ? body.title.trim() : '';
 
   if (!sourceId) {
     return json({ ok: false, message: 'A source item is required.' }, { status: 400 });
+  }
+
+  if (action === 'delete-forever' || deleteForever) {
+    const result = await env.STUDY_DB.prepare(`
+      DELETE FROM study_transcripts
+      WHERE source_id = ? AND class_id = 'trash'
+    `).bind(sourceId).run();
+    return json({ ok: true, sourceId, deleted: result.meta?.changes || 0 });
   }
 
   if (hasClassId && title) {

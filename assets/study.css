@@ -176,6 +176,12 @@ html{
   line-height:1.2;
 }
 
+.class-card.utility-link{
+  margin-top:8px;
+  border-style:dashed;
+  color:var(--muted);
+}
+
 .study-layout{
   display:grid;
   grid-template-columns:minmax(160px, 220px) minmax(420px, 1fr) minmax(280px, 340px);
@@ -545,6 +551,10 @@ html{
   gap:10px;
   align-items:end;
   margin-top:14px;
+}
+
+.trash-actions{
+  grid-template-columns:minmax(180px, 260px) auto auto;
 }
 
 .button.danger{

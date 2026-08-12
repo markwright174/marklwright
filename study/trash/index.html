@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Trash | Study Workspace</title>
+  <meta name="description" content="Recover or permanently delete trashed study materials.">
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="stylesheet" href="/assets/study.css">
+</head>
+<body class="study-body study-gated">
+  <main class="study-shell" id="trashTop">
+    <a class="back-link" href="/study/">Back to study home</a>
+    <header class="course-page-header">
+      <h1>Trash</h1>
+      <nav class="course-jump-nav" aria-label="Trash actions">
+        <a href="#trashed-materials">Trashed materials</a>
+      </nav>
+    </header>
+
+    <section class="study-section anchored-section" id="trashed-materials">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Recovery</p>
+          <h2>Trashed materials</h2>
+        </div>
+        <a class="section-top-link" href="#trashTop">Back to top</a>
+      </div>
+      <div id="trashMaterials" class="saved-list single-column" aria-live="polite"></div>
+    </section>
+  </main>
+  <script src="/assets/study-gate.js"></script>
+  <script src="/assets/study-trash.js"></script>
+</body>
+</html>
