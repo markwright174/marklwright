@@ -227,17 +227,24 @@
 
 .intake-list{
   display:grid;
-  gap:10px;
+  gap:0;
+  overflow:hidden;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:#fff;
 }
 
 .intake-item{
   display:grid;
-  gap:4px;
+  grid-template-columns:82px minmax(0, 1fr) 82px;
+  gap:10px;
+  align-items:center;
   width:100%;
-  min-height:86px;
-  border:1px solid var(--line);
-  border-radius:8px;
-  padding:14px;
+  min-height:42px;
+  border:0;
+  border-bottom:1px solid var(--line);
+  border-radius:0;
+  padding:9px 10px;
   color:var(--text);
   background:#fff;
   font:inherit;
@@ -247,17 +254,22 @@
 
 .intake-item:hover,
 .intake-item.active{
-  border-color:var(--accent);
   background:#f7fbfc;
 }
 
-.intake-item strong{
-  line-height:1.25;
+.intake-item.active{
+  box-shadow:inset 3px 0 0 var(--accent);
 }
 
-.intake-item span:last-child{
-  color:var(--muted);
-  font-size:.95rem;
+.intake-item:last-child{
+  border-bottom:0;
+}
+
+.intake-item strong{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  line-height:1.25;
 }
 
 .recording-preview{
@@ -739,7 +751,8 @@
   }
 
   .explorer-header,
-  .course-recording-button{
+  .course-recording-button,
+  .intake-item{
     grid-template-columns:76px minmax(0, 1fr) 72px;
     gap:8px;
   }

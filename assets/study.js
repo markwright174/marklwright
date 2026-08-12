@@ -200,13 +200,20 @@ function renderClasses() {
 function renderIntakeList() {
   const items = getUnassignedItems().slice().reverse();
   const selected = getSelectedItem(items);
-  intakeList.innerHTML = '';
 
   if (!items.length) {
     intakeList.innerHTML = '<p class="study-note">No unsorted study materials right now.</p>';
     setSelectedItem(null);
     return;
   }
+
+  intakeList.innerHTML = `
+    <div class="explorer-header" aria-hidden="true">
+      <span>Date</span>
+      <span>Name</span>
+      <span>Type</span>
+    </div>
+  `;
 
   items.forEach((item) => {
     const button = document.createElement('button');
@@ -215,9 +222,9 @@ function renderIntakeList() {
     button.dataset.recordingId = item.id;
     const kindLabel = getKindLabel(getItemKind(item));
     button.innerHTML = `
-      <span class="meta">${item.recordedAt ? new Date(item.recordedAt).toLocaleDateString() : 'Plaud'} · ${kindLabel}</span>
+      <span class="material-date">${item.recordedAt ? new Date(item.recordedAt).toLocaleDateString() : ''}</span>
       <strong>${escapeHtml(item.title)}</strong>
-      <span>${escapeHtml(item.summary ? getPreview(item.summary, 110) : getPreview(getItemText(item), 110))}</span>
+      <span class="material-type">${escapeHtml(kindLabel)}</span>
     `;
     intakeList.append(button);
   });
