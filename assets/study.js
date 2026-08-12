@@ -169,7 +169,6 @@ function createClassSelect(item) {
 }
 
 function renderClasses() {
-  const items = getSaved();
   classGrid.innerHTML = '';
 
   ['A Days', 'B Days'].forEach((day) => {
@@ -185,17 +184,11 @@ function renderClasses() {
     const grid = group.querySelector('.class-day-grid');
 
     defaultClasses.filter((klass) => klass.day === day).forEach((klass) => {
-      const count = items.filter((item) => item.classId === klass.id).length;
       const card = document.createElement('a');
       card.className = 'class-card';
       card.href = klass.href;
       card.innerHTML = `
-        <div>
-          <h3>${klass.name}</h3>
-          <p>${klass.note}</p>
-          <p class="class-count">${count} item${count === 1 ? '' : 's'}</p>
-        </div>
-        <span class="button secondary">Open course</span>
+        <h3>${klass.name}</h3>
       `;
       grid.append(card);
     });

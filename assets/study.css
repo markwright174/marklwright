@@ -76,7 +76,6 @@
 }
 
 .study-panel,
-.class-card,
 .saved-card{
   border:1px solid var(--line);
   border-radius:8px;
@@ -95,12 +94,12 @@
 
 .class-groups{
   display:grid;
-  gap:18px;
+  gap:14px;
 }
 
 .class-day-group{
   display:grid;
-  gap:12px;
+  gap:7px;
 }
 
 .class-day-head{
@@ -110,57 +109,42 @@
 
 .class-day-head h3{
   margin:0;
-  font-size:1.15rem;
+  font-size:1rem;
 }
 
 .class-day-head p{
   margin:0;
   color:var(--muted);
-  font-size:.9rem;
+  font-size:.82rem;
   font-weight:700;
 }
 
 .class-day-grid{
   display:grid;
   grid-template-columns:1fr;
-  gap:10px;
+  gap:4px;
 }
 
 .class-card{
-  display:grid;
-  gap:10px;
-  min-height:128px;
-  padding:14px;
+  display:block;
+  padding:9px 10px;
+  border:1px solid var(--line);
+  border-radius:6px;
   color:var(--text);
+  background:#fff;
   text-decoration:none;
 }
 
-.class-card.active{
+.class-card:hover,
+.class-card:focus-visible{
   border-color:var(--accent);
   background:#f7fbfc;
 }
 
 .class-card h3{
   margin:0;
-  font-size:1.08rem;
-  line-height:1.15;
-}
-
-.class-card p{
-  margin:0;
-  color:var(--muted);
-  font-size:.92rem;
-}
-
-.class-card .class-count{
-  margin-top:8px;
-  color:var(--accent-strong);
-  font-weight:800;
-}
-
-.class-card button{
-  align-self:end;
-  justify-self:start;
+  font-size:.96rem;
+  line-height:1.2;
 }
 
 .study-layout{
