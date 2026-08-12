@@ -84,7 +84,7 @@ function createStoredItem(item, existingItem = {}) {
     id: existingItem.id || crypto.randomUUID(),
     sourceId: item.sourceId,
     parentSourceId: item.parentSourceId || existingItem.parentSourceId || '',
-    title: String(item.title || existingItem.title || 'Plaud recording').trim(),
+    title: String(existingItem.renamed ? existingItem.title : (item.title || existingItem.title || 'Plaud recording')).trim(),
     kind: item.kind || existingItem.kind || getItemKind(item),
     classId: existingItem.classId || 'unassigned',
     text,
@@ -147,6 +147,10 @@ function createClassSelect(item) {
     option.textContent = klass.name;
     select.append(option);
   });
+  const trash = document.createElement('option');
+  trash.value = 'trash';
+  trash.textContent = 'Trash';
+  select.append(trash);
 
   select.value = item.classId || 'unassigned';
   select.addEventListener('change', () => {

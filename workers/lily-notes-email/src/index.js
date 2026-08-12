@@ -7,6 +7,28 @@ function decodeHeader(value) {
     .replace(/=([a-f0-9]{2})/gi, (_match, hex) => String.fromCharCode(Number.parseInt(hex, 16))));
 }
 
+function cleanMaterialTitle(value) {
+  return String(value || '')
+    .replace(/\.[a-z0-9]+$/i, '')
+    .replace(/\s*[-_]\s*(summary|transcript|transcription|notes)\s*$/i, '')
+    .replace(/_/g, ':')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function parseTitleDate(value, fallbackDate) {
+  const text = String(value || '');
+  const match = text.match(/\b(\d{1,2})[-/.](\d{1,2})(?:[-/.](\d{2,4}))?\b/);
+  if (!match) return fallbackDate ? new Date(fallbackDate).toISOString() : null;
+  const fallback = fallbackDate ? new Date(fallbackDate) : new Date();
+  const month = Number.parseInt(match[1], 10);
+  const day = Number.parseInt(match[2], 10);
+  let year = match[3] ? Number.parseInt(match[3], 10) : fallback.getUTCFullYear();
+  if (year < 100) year += 2000;
+  if (!month || !day || month > 12 || day > 31) return fallbackDate ? new Date(fallbackDate).toISOString() : null;
+  return new Date(Date.UTC(year, month - 1, day, 12, 0, 0)).toISOString();
+}
+
 function decodeBase64(value) {
   const clean = String(value || '').replace(/\s+/g, '');
   if (!clean) return '';
@@ -126,20 +148,22 @@ function stripHtml(html) {
 
 function extractPlaudText(parsed) {
   const parts = parseMimeParts(parsed);
-  const transcript = parts.find((part) => {
+  const transcriptPart = parts.find((part) => {
     const filename = part.filename.toLowerCase();
     return filename === 'transcript.txt' || filename.includes('transcript') || filename.includes('transcription');
-  })?.text || '';
-  const summary = parts.find((part) => {
+  });
+  const summaryPart = parts.find((part) => {
     const filename = part.filename.toLowerCase();
     return filename === 'summary.txt' || filename.includes('summary') || filename.includes('notes');
-  })?.text || '';
+  });
   const html = parts.find((part) => part.contentType.toLowerCase().includes('text/html'))?.text || '';
   const text = parts.find((part) => part.contentType.toLowerCase().includes('text/plain'))?.text || '';
 
   return {
-    summary,
-    transcript,
+    summary: summaryPart?.text || '',
+    transcript: transcriptPart?.text || '',
+    summaryTitle: cleanMaterialTitle(summaryPart?.filename || ''),
+    transcriptTitle: cleanMaterialTitle(transcriptPart?.filename || ''),
     bodyText: text || stripHtml(html) || stripHtml(parsed.body),
   };
 }
@@ -198,18 +222,23 @@ async function parseMessage(message) {
   const plaudText = extractPlaudText(parsed);
   const bodyText = plaudText.bodyText;
   const content = parseStudyContent(bodyText);
+  const materialTitle = plaudText.summaryTitle || plaudText.transcriptTitle || parsed.subject || 'Plaud class notes';
   const sourceSeed = [
     parsed.messageId,
     parsed.subject,
     parsed.date,
+    plaudText.summaryTitle,
+    plaudText.transcriptTitle,
     bodyText.slice(0, 1000),
   ].filter(Boolean).join('|');
 
   return {
     sourceId: `email:${await hashSourceId(sourceSeed || crypto.randomUUID())}`,
     messageId: parsed.messageId,
-    title: parsed.subject || 'Plaud class notes',
-    recordedAt: parsed.date ? new Date(parsed.date).toISOString() : null,
+    title: materialTitle,
+    summaryTitle: plaudText.summaryTitle,
+    transcriptTitle: plaudText.transcriptTitle,
+    recordedAt: parseTitleDate(materialTitle, parsed.date),
     summary: plaudText.summary || content.summary,
     transcript: plaudText.transcript || content.transcript,
     rawText: content.rawText,
@@ -230,7 +259,7 @@ function buildTranscriptRows(item) {
   if (hasDistinctSummary) {
     rows.push({
       sourceId: `${item.sourceId}:summary`,
-      title: `${item.title} - Summary`,
+      title: `${item.summaryTitle || item.title} - Summary`,
       recordedAt: item.recordedAt,
       summary,
       transcript: '',
@@ -243,7 +272,7 @@ function buildTranscriptRows(item) {
   if (hasTranscript) {
     rows.push({
       sourceId: `${item.sourceId}:transcript`,
-      title: `${item.title} - Transcript`,
+      title: `${item.transcriptTitle || item.title} - Transcript`,
       recordedAt: item.recordedAt,
       summary: '',
       transcript,

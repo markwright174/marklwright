@@ -45,6 +45,8 @@ const retiredTestSourceIds = new Set([
 ]);
 const courseId = document.body.dataset.course;
 const selectedCourseRecordingKey = `studyWorkspaceSelectedRecording:${courseId}`;
+const courseSearchKey = `studyWorkspaceSearch:${courseId}`;
+const courseSortKey = `studyWorkspaceSort:${courseId}`;
 const course = courseClasses.find((entry) => entry.id === courseId) || courseClasses[0];
 const title = document.querySelector('#courseTitle');
 const count = document.querySelector('#courseCount');
@@ -82,6 +84,14 @@ function getPreview(text, length = 360) {
   return clean.slice(0, length) + (clean.length > length ? '...' : '');
 }
 
+function getSearchValue() {
+  return localStorage.getItem(courseSearchKey) || '';
+}
+
+function getSortValue() {
+  return localStorage.getItem(courseSortKey) || 'date-desc';
+}
+
 function getItemText(item) {
   return String(item.text || item.summary || '').trim();
 }
@@ -109,8 +119,34 @@ function escapeHtml(value) {
   }[character]));
 }
 
+function sortCourseItems(items) {
+  const sort = getSortValue();
+  return items.slice().sort((a, b) => {
+    if (sort === 'date-asc') {
+      return String(a.recordedAt || '').localeCompare(String(b.recordedAt || ''));
+    }
+    if (sort === 'title') {
+      return String(a.title || '').localeCompare(String(b.title || ''));
+    }
+    if (sort === 'kind') {
+      return getKindLabel(getItemKind(a)).localeCompare(getKindLabel(getItemKind(b)))
+        || String(a.title || '').localeCompare(String(b.title || ''));
+    }
+    return String(b.recordedAt || '').localeCompare(String(a.recordedAt || ''));
+  });
+}
+
+function getAllCourseItems() {
+  return getSaved().filter((item) => item.classId === course.id);
+}
+
 function getCourseItems() {
-  return getSaved().filter((item) => item.classId === course.id).slice().reverse();
+  const search = getSearchValue().trim().toLowerCase();
+  const items = getAllCourseItems();
+  const filtered = search
+    ? items.filter((item) => `${item.title} ${getItemText(item)} ${getKindLabel(getItemKind(item))}`.toLowerCase().includes(search))
+    : items;
+  return sortCourseItems(filtered);
 }
 
 function getSelectedCourseItem(items) {
@@ -130,6 +166,22 @@ function getRecordingDateLabel(item) {
   return item.recordedAt ? new Date(item.recordedAt).toLocaleDateString() : 'Recording';
 }
 
+function updateItem(itemId, updater) {
+  const items = getSaved();
+  const target = items.find((item) => item.id === itemId);
+  if (!target) return null;
+  updater(target);
+  target.updatedAt = new Date().toISOString();
+  setSaved(items);
+  return target;
+}
+
+function createCourseOptions(selectedClassId) {
+  return courseClasses
+    .map((klass) => `<option value="${escapeHtml(klass.id)}"${klass.id === selectedClassId ? ' selected' : ''}>${escapeHtml(klass.name)}</option>`)
+    .join('');
+}
+
 function getEmptyMaterialsMessage() {
   return `
     <div class="detail-head">
@@ -144,27 +196,57 @@ function getEmptyMaterialsMessage() {
 }
 
 function renderCourse() {
+  const allItems = getAllCourseItems();
   const items = getCourseItems();
   const selected = getSelectedCourseItem(items);
   title.textContent = course.name;
-  count.textContent = `${items.length} item${items.length === 1 ? '' : 's'} saved here`;
+  count.textContent = `${allItems.length} item${allItems.length === 1 ? '' : 's'} saved here`;
   list.innerHTML = '';
   list.classList.remove('single-column');
   list.classList.add('course-workbench');
   list.innerHTML = `
-    <div class="course-recording-list" aria-label="Recordings"></div>
+    <div class="course-recording-list" aria-label="Study materials">
+      <div class="explorer-toolbar">
+        <label>
+          <span>Search</span>
+          <input id="courseMaterialSearch" type="search" value="${escapeHtml(getSearchValue())}" placeholder="Find material">
+        </label>
+        <label>
+          <span>Sort</span>
+          <select id="courseMaterialSort">
+            <option value="date-desc"${getSortValue() === 'date-desc' ? ' selected' : ''}>Newest first</option>
+            <option value="date-asc"${getSortValue() === 'date-asc' ? ' selected' : ''}>Oldest first</option>
+            <option value="title"${getSortValue() === 'title' ? ' selected' : ''}>Title</option>
+            <option value="kind"${getSortValue() === 'kind' ? ' selected' : ''}>Type</option>
+          </select>
+        </label>
+      </div>
+      <div class="explorer-items"></div>
+    </div>
     <article class="course-recording-detail" aria-live="polite"></article>
   `;
 
   const recordingList = list.querySelector('.course-recording-list');
+  const explorerItems = list.querySelector('.explorer-items');
   const detail = list.querySelector('.course-recording-detail');
+  const searchInput = list.querySelector('#courseMaterialSearch');
+  const sortSelect = list.querySelector('#courseMaterialSort');
+
+  searchInput.addEventListener('input', () => {
+    localStorage.setItem(courseSearchKey, searchInput.value);
+    renderCourse();
+  });
+  sortSelect.addEventListener('change', () => {
+    localStorage.setItem(courseSortKey, sortSelect.value);
+    renderCourse();
+  });
 
   if (!items.length) {
-    recordingList.innerHTML = `
+    explorerItems.innerHTML = `
       <div class="empty-list-panel">
         <p class="meta">Study materials</p>
-        <h3>No items yet</h3>
-        <p>When a summary or transcript is sent to ${escapeHtml(course.name)}, it will show up here.</p>
+        <h3>${allItems.length ? 'No matches' : 'No items yet'}</h3>
+        <p>${allItems.length ? 'Try a different search.' : `When a summary or transcript is sent to ${escapeHtml(course.name)}, it will show up here.`}</p>
       </div>
     `;
     detail.innerHTML = getEmptyMaterialsMessage();
@@ -182,7 +264,7 @@ function renderCourse() {
       <strong>${escapeHtml(item.title)}</strong>
       <span>${escapeHtml(getPreview(getItemText(item), 120))}</span>
     `;
-    recordingList.append(button);
+    explorerItems.append(button);
   });
 
   const selectedKindLabel = getKindLabel(getItemKind(selected));
@@ -190,6 +272,21 @@ function renderCourse() {
     <div class="detail-head">
       <p class="meta">${getRecordingDateLabel(selected)} · ${selectedKindLabel}</p>
       <h3>${escapeHtml(selected.title)}</h3>
+      <div class="material-actions">
+        <label>
+          <span>Rename</span>
+          <input id="materialRename" type="text" value="${escapeHtml(selected.title)}">
+        </label>
+        <label>
+          <span>Move to</span>
+          <select id="materialMove">
+            ${createCourseOptions(selected.classId)}
+            <option value="trash">Trash</option>
+          </select>
+        </label>
+        <button class="button secondary" id="renameMaterial" type="button">Save name</button>
+        <button class="button secondary danger" id="trashMaterial" type="button">Trash</button>
+      </div>
     </div>
     <div class="detail-scroll">
       <h4>${selectedKindLabel}</h4>
@@ -203,10 +300,39 @@ function renderCourse() {
     setSelectedCourseItem(button.dataset.recordingId);
     renderCourse();
   });
+
+  detail.querySelector('#renameMaterial').addEventListener('click', () => {
+    const nextTitle = detail.querySelector('#materialRename').value.trim();
+    if (!nextTitle) return;
+    updateItem(selected.id, (item) => {
+      item.title = nextTitle;
+      item.renamed = true;
+    });
+    renderCourse();
+    renderChat();
+  });
+
+  detail.querySelector('#materialMove').addEventListener('change', (event) => {
+    updateItem(selected.id, (item) => {
+      item.classId = event.target.value;
+    });
+    setSelectedCourseItem(null);
+    renderCourse();
+    renderChat();
+  });
+
+  detail.querySelector('#trashMaterial').addEventListener('click', () => {
+    updateItem(selected.id, (item) => {
+      item.classId = 'trash';
+    });
+    setSelectedCourseItem(null);
+    renderCourse();
+    renderChat();
+  });
 }
 
 function renderChat() {
-  const items = getCourseItems();
+  const items = sortCourseItems(getAllCourseItems());
   if (!chat) return;
 
   if (!items.length) {
