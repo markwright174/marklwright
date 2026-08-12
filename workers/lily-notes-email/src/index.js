@@ -1,4 +1,5 @@
 const DEFAULT_ALLOWED_RECIPIENT = 'lily-notes@marklwright.com';
+const STUDY_ACCESS_HEADER = 'X-Study-Access';
 
 function decodeHeader(value) {
   return String(value || '').replace(/=\?utf-8\?q\?([^?]+)\?=/gi, (_, encoded) => encoded
@@ -253,6 +254,45 @@ async function logEmailEvent(env, details) {
 }
 
 export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
+
+    if (url.pathname === '/diagnostics') {
+      if (request.headers.get(STUDY_ACCESS_HEADER) !== env.STUDY_ACCESS_PASSWORD) {
+        return Response.json({ ok: false, message: 'Study access required.' }, { status: 401 });
+      }
+
+      if (!env.STUDY_DB) {
+        return Response.json({ ok: false, message: 'Study transcript database is not configured.' }, { status: 500 });
+      }
+
+      try {
+        const result = await env.STUDY_DB.prepare(`
+          SELECT status, subject, from_email, to_email, error_detail, summary_length, transcript_length, raw_text_length, received_at
+          FROM study_email_events
+          ORDER BY received_at DESC
+          LIMIT 20
+        `).all();
+
+        return Response.json({
+          ok: true,
+          count: result.results?.length || 0,
+          items: result.results || [],
+        });
+      } catch (error) {
+        const messageText = error instanceof Error ? error.message : String(error);
+        console.error('Study diagnostics query failed:', error);
+        return Response.json({ ok: false, message: messageText }, { status: 500 });
+      }
+    }
+
+    return Response.json({
+      ok: true,
+      service: 'lily-notes-email',
+      purpose: 'Receives Plaud AutoFlow emails and saves parsed study notes.',
+    });
+  },
+
   async email(message, env) {
     const allowedRecipient = (env.ALLOWED_RECIPIENT || DEFAULT_ALLOWED_RECIPIENT).toLowerCase();
     if (message.to.toLowerCase() !== allowedRecipient) {
