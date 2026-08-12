@@ -170,6 +170,46 @@ function getListDateLabel(item) {
   return item.recordedAt ? new Date(item.recordedAt).toLocaleDateString() : '';
 }
 
+function getDriveFolderUrl() {
+  return course.driveFolderId
+    ? `https://drive.google.com/drive/folders/${encodeURIComponent(course.driveFolderId)}`
+    : '';
+}
+
+function getFileSafeName(value) {
+  return String(value || 'study-material')
+    .replace(/[<>:"/\\|?*]+/g, '-')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 140);
+}
+
+function saveItemCopy(item) {
+  const kindLabel = getKindLabel(getItemKind(item));
+  const content = [
+    item.title,
+    '',
+    `Course: ${course.name}`,
+    `Type: ${kindLabel}`,
+    `Date: ${getListDateLabel(item) || 'Not dated'}`,
+    '',
+    getItemText(item),
+  ].join('\n');
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `${getFileSafeName(item.title)}.txt`;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(link.href);
+
+  const folderUrl = getDriveFolderUrl();
+  if (folderUrl) {
+    window.open(folderUrl, '_blank', 'noopener');
+  }
+}
+
 function updateItem(itemId, updater) {
   const items = getSaved();
   const target = items.find((item) => item.id === itemId);
@@ -294,8 +334,9 @@ function renderCourse() {
           </select>
         </label>
         <button class="button secondary" id="renameMaterial" type="button">Save name</button>
-        <button class="button secondary danger" id="trashMaterial" type="button">Trash</button>
+        <button class="button secondary" id="saveMaterialDrive" type="button"${course.driveFolderId ? '' : ' disabled'}>Save to Drive</button>
       </div>
+      <p class="material-status" id="materialStatus">${course.driveFolderId ? '' : 'No Drive folder is connected for this course yet.'}</p>
     </div>
     <div class="detail-scroll">
       <h4>${selectedKindLabel}</h4>
@@ -330,13 +371,12 @@ function renderCourse() {
     renderChat();
   });
 
-  detail.querySelector('#trashMaterial').addEventListener('click', () => {
-    updateItem(selected.id, (item) => {
-      item.classId = 'trash';
-    });
-    setSelectedCourseItem(null);
-    renderCourse();
-    renderChat();
+  detail.querySelector('#saveMaterialDrive').addEventListener('click', () => {
+    saveItemCopy(selected);
+    const status = detail.querySelector('#materialStatus');
+    status.textContent = course.driveFolderId
+      ? 'A text copy was downloaded. Add it to the Drive folder that opened.'
+      : 'No Drive folder is connected for this course yet.';
   });
 }
 

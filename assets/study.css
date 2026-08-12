@@ -527,6 +527,13 @@
   color:#8a1f1f;
 }
 
+.material-status{
+  min-height:1.2em;
+  margin:10px 0 0;
+  color:var(--muted);
+  font-size:.92rem;
+}
+
 .detail-scroll{
   min-height:280px;
   max-height:520px;
