@@ -99,6 +99,11 @@ html{
 
 .anchored-section{
   scroll-margin-top:116px;
+  padding:22px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:#fff;
+  box-shadow:var(--shadow);
 }
 
 .section-head{

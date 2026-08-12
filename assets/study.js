@@ -86,7 +86,7 @@ function createStoredItem(item, existingItem = {}) {
     parentSourceId: item.parentSourceId || existingItem.parentSourceId || '',
     title: String(existingItem.renamed ? existingItem.title : (item.title || existingItem.title || 'Plaud recording')).trim(),
     kind: item.kind || existingItem.kind || getItemKind(item),
-    classId: existingItem.classId || 'unassigned',
+    classId: existingItem.classId || item.classId || 'unassigned',
     text,
     summary: String(item.summary || '').trim(),
     preview: getPreview(text),
@@ -94,6 +94,19 @@ function createStoredItem(item, existingItem = {}) {
     updatedAt: new Date().toISOString(),
     recordedAt: item.recordedAt || existingItem.recordedAt || null,
   };
+}
+
+async function persistClassAssignment(item, classId) {
+  if (!item.sourceId || classId === 'trash') return;
+  try {
+    await fetch('/api/study/assign-material', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...window.getStudyAccessHeaders() },
+      body: JSON.stringify({ sourceId: item.sourceId, classId }),
+    });
+  } catch {
+    // Keep the local move even if the hosted save is temporarily unavailable.
+  }
 }
 
 function isCloudEmailImport(item) {
@@ -159,6 +172,7 @@ function createClassSelect(item) {
     if (!target) return;
     target.classId = select.value;
     setSaved(items);
+    persistClassAssignment(target, select.value);
     if (select.value !== 'unassigned') {
       setSelectedItem(null);
     }

@@ -65,6 +65,24 @@ function setSaved(items) {
   localStorage.setItem(courseStorageKey, JSON.stringify(items));
 }
 
+function createStoredCourseItem(item, existingItem = {}) {
+  const text = getItemText(item);
+  return {
+    id: existingItem.id || crypto.randomUUID(),
+    sourceId: item.sourceId,
+    parentSourceId: item.parentSourceId || existingItem.parentSourceId || '',
+    title: String(existingItem.renamed ? existingItem.title : (item.title || existingItem.title || 'Study material')).trim(),
+    kind: item.kind || existingItem.kind || getItemKind(item),
+    classId: item.classId || existingItem.classId || course.id,
+    text,
+    summary: String(item.summary || '').trim(),
+    preview: getPreview(text),
+    createdAt: existingItem.createdAt || new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    recordedAt: item.recordedAt || existingItem.recordedAt || null,
+  };
+}
+
 function isRetiredTestItem(item) {
   return retiredTestSourceIds.has(item?.sourceId)
     || String(item?.title || '').startsWith('[Plaud-AutoFlow] 2026-08-06 11:52:36');
@@ -137,6 +155,39 @@ function sortCourseItems(items) {
 
 function getAllCourseItems() {
   return getSaved().filter((item) => item.classId === course.id);
+}
+
+async function syncCourseItemsFromCloudflare() {
+  if (!window.getStudyAccessHeaders) return;
+
+  try {
+    const response = await fetch(`/api/study/course-materials?classId=${encodeURIComponent(course.id)}`, {
+      headers: window.getStudyAccessHeaders(),
+    });
+    if (!response.ok) return;
+    const result = await response.json();
+    const incoming = Array.isArray(result.items) ? result.items : [];
+    if (!incoming.length) return;
+
+    const saved = getSaved();
+    const bySourceId = new Map(saved.map((item) => [item.sourceId, item]).filter(([sourceId]) => sourceId));
+    const merged = [...saved];
+
+    incoming.forEach((item) => {
+      const existing = bySourceId.get(item.sourceId);
+      if (existing) {
+        Object.assign(existing, createStoredCourseItem(item, existing));
+      } else {
+        merged.push(createStoredCourseItem(item));
+      }
+    });
+
+    setSaved(merged);
+    renderCourse();
+    renderChat();
+  } catch {
+    // Local course materials still render if the hosted sync is unavailable.
+  }
 }
 
 function getCourseItems() {
@@ -361,9 +412,17 @@ function renderCourse() {
   });
 
   detail.querySelector('#materialMove').addEventListener('change', (event) => {
+    const nextClassId = event.target.value;
     updateItem(selected.id, (item) => {
-      item.classId = event.target.value;
+      item.classId = nextClassId;
     });
+    if (selected.sourceId && nextClassId !== 'trash') {
+      fetch('/api/study/assign-material', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...window.getStudyAccessHeaders() },
+        body: JSON.stringify({ sourceId: selected.sourceId, classId: nextClassId }),
+      }).catch(() => {});
+    }
     setSelectedCourseItem(null);
     renderCourse();
     renderChat();
@@ -513,3 +572,4 @@ clearRetiredTestItems();
 renderCourse();
 renderChat();
 renderDriveMaterials();
+syncCourseItemsFromCloudflare();

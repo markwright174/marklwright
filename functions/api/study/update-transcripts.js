@@ -224,12 +224,22 @@ async function getRecordingItem(env, workspaceToken, recording) {
 }
 
 async function getD1Items(env) {
-  const result = await env.STUDY_DB.prepare(`
-    SELECT source_id, title, recorded_at, summary, transcript, received_at
-    FROM study_transcripts
-    ORDER BY received_at DESC
-    LIMIT 50
-  `).all();
+  let result;
+  try {
+    result = await env.STUDY_DB.prepare(`
+      SELECT source_id, title, recorded_at, summary, transcript, received_at, class_id
+      FROM study_transcripts
+      ORDER BY received_at DESC
+      LIMIT 50
+    `).all();
+  } catch {
+    result = await env.STUDY_DB.prepare(`
+      SELECT source_id, title, recorded_at, summary, transcript, received_at
+      FROM study_transcripts
+      ORDER BY received_at DESC
+      LIMIT 50
+    `).all();
+  }
 
   return (result.results || []).map((row) => ({
     sourceId: row.source_id,
@@ -239,6 +249,7 @@ async function getD1Items(env) {
     text: row.transcript || '',
     summary: row.summary || '',
     kind: row.transcript ? 'transcript' : 'summary',
+    classId: row.class_id || 'unassigned',
   }));
 }
 
