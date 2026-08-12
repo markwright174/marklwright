@@ -166,6 +166,10 @@ function getRecordingDateLabel(item) {
   return item.recordedAt ? new Date(item.recordedAt).toLocaleDateString() : 'Recording';
 }
 
+function getListDateLabel(item) {
+  return item.recordedAt ? new Date(item.recordedAt).toLocaleDateString() : '';
+}
+
 function updateItem(itemId, updater) {
   const items = getSaved();
   const target = items.find((item) => item.id === itemId);
@@ -221,7 +225,13 @@ function renderCourse() {
           </select>
         </label>
       </div>
-      <div class="explorer-items"></div>
+      <div class="explorer-items">
+        <div class="explorer-header" aria-hidden="true">
+          <span>Date</span>
+          <span>Name</span>
+          <span>Type</span>
+        </div>
+      </div>
     </div>
     <article class="course-recording-detail" aria-live="polite"></article>
   `;
@@ -260,9 +270,9 @@ function renderCourse() {
     button.dataset.recordingId = item.id;
     const kindLabel = getKindLabel(getItemKind(item));
     button.innerHTML = `
-      <span class="meta">${getRecordingDateLabel(item)} · ${kindLabel}</span>
+      <span class="material-date">${escapeHtml(getListDateLabel(item))}</span>
       <strong>${escapeHtml(item.title)}</strong>
-      <span>${escapeHtml(getPreview(getItemText(item), 120))}</span>
+      <span class="material-type">${escapeHtml(kindLabel)}</span>
     `;
     explorerItems.append(button);
   });
@@ -270,7 +280,6 @@ function renderCourse() {
   const selectedKindLabel = getKindLabel(getItemKind(selected));
   detail.innerHTML = `
     <div class="detail-head">
-      <p class="meta">${getRecordingDateLabel(selected)} · ${selectedKindLabel}</p>
       <h3>${escapeHtml(selected.title)}</h3>
       <div class="material-actions">
         <label>

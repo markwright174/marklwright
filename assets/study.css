@@ -410,7 +410,29 @@
 
 .explorer-items{
   display:grid;
-  gap:6px;
+  gap:0;
+  overflow:hidden;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:#fff;
+}
+
+.explorer-header,
+.course-recording-button{
+  display:grid;
+  grid-template-columns:82px minmax(0, 1fr) 82px;
+  gap:10px;
+  align-items:center;
+}
+
+.explorer-header{
+  padding:8px 10px;
+  color:var(--muted);
+  background:#f8faf9;
+  border-bottom:1px solid var(--line);
+  font-size:.76rem;
+  font-weight:800;
+  text-transform:uppercase;
 }
 
 .empty-list-panel{
@@ -430,13 +452,12 @@
 }
 
 .course-recording-button{
-  display:grid;
-  gap:3px;
   width:100%;
-  min-height:68px;
-  border:1px solid var(--line);
-  border-radius:6px;
-  padding:10px 12px;
+  min-height:42px;
+  border:0;
+  border-bottom:1px solid var(--line);
+  border-radius:0;
+  padding:9px 10px;
   color:var(--text);
   background:#fff;
   font:inherit;
@@ -446,18 +467,33 @@
 
 .course-recording-button:hover,
 .course-recording-button.active{
-  border-color:var(--accent);
   background:#f7fbfc;
 }
 
+.course-recording-button.active{
+  box-shadow:inset 3px 0 0 var(--accent);
+}
+
+.course-recording-button:last-child{
+  border-bottom:0;
+}
+
 .course-recording-button strong{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
   line-height:1.25;
   font-size:.95rem;
 }
 
-.course-recording-button span:last-child{
+.material-date,
+.material-type{
   color:var(--muted);
-  font-size:.92rem;
+  font-size:.86rem;
+}
+
+.material-type{
+  text-align:right;
 }
 
 .course-recording-detail{
@@ -709,5 +745,11 @@
 
   .material-actions{
     grid-template-columns:1fr;
+  }
+
+  .explorer-header,
+  .course-recording-button{
+    grid-template-columns:76px minmax(0, 1fr) 72px;
+    gap:8px;
   }
 }
