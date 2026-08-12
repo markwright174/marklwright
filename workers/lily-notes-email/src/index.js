@@ -198,6 +198,7 @@ async function parseMessage(message) {
 
   return {
     sourceId: `email:${await hashSourceId(sourceSeed || crypto.randomUUID())}`,
+    messageId: parsed.messageId,
     title: parsed.subject || 'Plaud class notes',
     recordedAt: parsed.date ? new Date(parsed.date).toISOString() : null,
     summary: plaudText.summary || content.summary,
@@ -209,7 +210,7 @@ async function parseMessage(message) {
 }
 
 async function storeTranscript(env, item) {
-  await env.STUDY_DB.prepare(`
+  return env.STUDY_DB.prepare(`
     INSERT OR IGNORE INTO study_transcripts
       (source_id, title, recorded_at, summary, transcript, raw_text, from_email, received_at)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -225,10 +226,42 @@ async function storeTranscript(env, item) {
   ).run();
 }
 
+async function logEmailEvent(env, details) {
+  if (!env.STUDY_DB) return;
+  try {
+    await env.STUDY_DB.prepare(`
+      INSERT INTO study_email_events
+        (event_type, status, source_id, message_id, subject, from_email, to_email, error_detail, summary_length, transcript_length, raw_text_length, received_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).bind(
+      details.eventType || 'email',
+      details.status,
+      details.sourceId || null,
+      details.messageId || null,
+      details.subject || null,
+      details.fromEmail || null,
+      details.toEmail || null,
+      details.errorDetail || null,
+      details.summaryLength || 0,
+      details.transcriptLength || 0,
+      details.rawTextLength || 0,
+      details.receivedAt || new Date().toISOString(),
+    ).run();
+  } catch (error) {
+    console.error('Failed to write study email diagnostic event:', error);
+  }
+}
+
 export default {
   async email(message, env) {
     const allowedRecipient = (env.ALLOWED_RECIPIENT || DEFAULT_ALLOWED_RECIPIENT).toLowerCase();
     if (message.to.toLowerCase() !== allowedRecipient) {
+      await logEmailEvent(env, {
+        status: 'rejected_wrong_recipient',
+        fromEmail: message.from || null,
+        toEmail: message.to || null,
+        errorDetail: `Expected ${allowedRecipient}`,
+      });
       message.setReject(`This address only accepts Plaud notes for ${allowedRecipient}.`);
       return;
     }
@@ -238,8 +271,41 @@ export default {
       return;
     }
 
-    const item = await parseMessage(message);
-    if (!shouldStoreMessage(item)) return;
-    await storeTranscript(env, item);
+    try {
+      const item = await parseMessage(message);
+      const diagnostic = {
+        sourceId: item.sourceId,
+        messageId: item.messageId,
+        subject: item.title,
+        fromEmail: item.fromEmail,
+        toEmail: message.to || null,
+        summaryLength: item.summary.length,
+        transcriptLength: item.transcript.length,
+        rawTextLength: item.rawText.length,
+        receivedAt: item.receivedAt,
+      };
+
+      if (!shouldStoreMessage(item)) {
+        await logEmailEvent(env, { ...diagnostic, status: 'skipped_filter' });
+        return;
+      }
+
+      const result = await storeTranscript(env, item);
+      const changes = result?.meta?.changes || 0;
+      await logEmailEvent(env, {
+        ...diagnostic,
+        status: changes ? 'stored' : 'duplicate_ignored',
+      });
+    } catch (error) {
+      const messageText = error instanceof Error ? error.message : String(error);
+      console.error('Study email worker failed:', error);
+      await logEmailEvent(env, {
+        status: 'error',
+        fromEmail: message.from || null,
+        toEmail: message.to || null,
+        errorDetail: messageText,
+      });
+      message.setReject(`Study email worker failed: ${messageText}`);
+    }
   },
 };
