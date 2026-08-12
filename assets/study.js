@@ -97,7 +97,7 @@ function createStoredItem(item, existingItem = {}) {
 }
 
 async function persistClassAssignment(item, classId) {
-  if (!item.sourceId || classId === 'trash') return;
+  if (!item.sourceId) return;
   try {
     await fetch('/api/study/assign-material', {
       method: 'POST',

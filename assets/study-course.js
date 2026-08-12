@@ -65,13 +65,16 @@ function setSaved(items) {
   localStorage.setItem(courseStorageKey, JSON.stringify(items));
 }
 
-function createStoredCourseItem(item, existingItem = {}) {
+function createStoredCourseItem(item, existingItem = {}, options = {}) {
   const text = getItemText(item);
+  const title = options.trustRemoteTitle
+    ? (item.title || existingItem.title || 'Study material')
+    : (existingItem.renamed ? existingItem.title : (item.title || existingItem.title || 'Study material'));
   return {
     id: existingItem.id || crypto.randomUUID(),
     sourceId: item.sourceId,
     parentSourceId: item.parentSourceId || existingItem.parentSourceId || '',
-    title: String(existingItem.renamed ? existingItem.title : (item.title || existingItem.title || 'Study material')).trim(),
+    title: String(title).trim(),
     kind: item.kind || existingItem.kind || getItemKind(item),
     classId: item.classId || existingItem.classId || course.id,
     text,
@@ -81,6 +84,19 @@ function createStoredCourseItem(item, existingItem = {}) {
     updatedAt: new Date().toISOString(),
     recordedAt: item.recordedAt || existingItem.recordedAt || null,
   };
+}
+
+async function persistMaterialChange(item, changes) {
+  if (!item?.sourceId || !window.getStudyAccessHeaders) return;
+  try {
+    await fetch('/api/study/assign-material', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...window.getStudyAccessHeaders() },
+      body: JSON.stringify({ sourceId: item.sourceId, ...changes }),
+    });
+  } catch {
+    // Keep local changes usable if the hosted save is temporarily unavailable.
+  }
 }
 
 function isRetiredTestItem(item) {
@@ -167,16 +183,21 @@ async function syncCourseItemsFromCloudflare() {
     if (!response.ok) return;
     const result = await response.json();
     const incoming = Array.isArray(result.items) ? result.items : [];
-    if (!incoming.length) return;
-
     const saved = getSaved();
+    const incomingSourceIds = new Set(incoming.map((item) => item.sourceId).filter(Boolean));
+    const retained = saved.filter((item) => (
+      item.classId !== course.id
+      || !String(item.sourceId || '').startsWith('email:')
+      || incomingSourceIds.has(item.sourceId)
+    ));
     const bySourceId = new Map(saved.map((item) => [item.sourceId, item]).filter(([sourceId]) => sourceId));
-    const merged = [...saved];
+    const merged = [...retained];
 
     incoming.forEach((item) => {
       const existing = bySourceId.get(item.sourceId);
       if (existing) {
-        Object.assign(existing, createStoredCourseItem(item, existing));
+        Object.assign(existing, createStoredCourseItem(item, existing, { trustRemoteTitle: true }));
+        if (!merged.includes(existing)) merged.push(existing);
       } else {
         merged.push(createStoredCourseItem(item));
       }
@@ -407,6 +428,7 @@ function renderCourse() {
       item.title = nextTitle;
       item.renamed = true;
     });
+    persistMaterialChange(selected, { title: nextTitle });
     renderCourse();
     renderChat();
   });
@@ -416,13 +438,7 @@ function renderCourse() {
     updateItem(selected.id, (item) => {
       item.classId = nextClassId;
     });
-    if (selected.sourceId && nextClassId !== 'trash') {
-      fetch('/api/study/assign-material', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...window.getStudyAccessHeaders() },
-        body: JSON.stringify({ sourceId: selected.sourceId, classId: nextClassId }),
-      }).catch(() => {});
-    }
+    persistMaterialChange(selected, { classId: nextClassId });
     setSelectedCourseItem(null);
     renderCourse();
     renderChat();
