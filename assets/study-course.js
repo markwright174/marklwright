@@ -49,7 +49,6 @@ const courseSearchKey = `studyWorkspaceSearch:${courseId}`;
 const courseSortKey = `studyWorkspaceSort:${courseId}`;
 const course = courseClasses.find((entry) => entry.id === courseId) || courseClasses[0];
 const title = document.querySelector('#courseTitle');
-const count = document.querySelector('#courseCount');
 const list = document.querySelector('#courseRecordings');
 const chat = document.querySelector('#studyChat');
 const driveMaterials = document.querySelector('#courseDriveMaterials');
@@ -244,7 +243,6 @@ function renderCourse() {
   const items = getCourseItems();
   const selected = getSelectedCourseItem(items);
   title.textContent = course.name;
-  count.textContent = `${allItems.length} item${allItems.length === 1 ? '' : 's'} saved here`;
   list.innerHTML = '';
   list.classList.remove('single-column');
   list.classList.add('course-workbench');

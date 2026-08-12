@@ -11,37 +11,41 @@
 <body class="study-body study-gated" data-course="class-e">
   <main class="study-shell">
     <a class="back-link" href="/study/">Back to study home</a>
-    <section class="study-hero course-hero">
-      <div>
-        <p class="eyebrow">Course page</p>
-        <h1 id="courseTitle">English</h1>
-        <p class="lede" id="courseCount">Recordings saved here</p>
-      </div>
-    </section>
-    <section class="study-section">
+    <header class="course-page-header" id="courseTop">
+      <h1 id="courseTitle">English</h1>
+      <nav class="course-jump-nav" aria-label="Course sections">
+        <a href="#recordings">Recordings</a>
+        <a href="#drive-materials">Drive materials</a>
+        <a href="#class-helper">Class helper</a>
+      </nav>
+    </header>
+    <section class="study-section anchored-section" id="recordings">
       <div class="section-head">
         <div>
           <p class="eyebrow">Class materials</p>
           <h2>Recordings and notes</h2>
         </div>
+        <a class="section-top-link" href="#courseTop">Back to top</a>
       </div>
       <div id="courseRecordings" class="saved-list single-column" aria-live="polite"></div>
     </section>
-    <section class="study-section">
+    <section class="study-section anchored-section" id="drive-materials">
       <div class="section-head">
         <div>
           <p class="eyebrow">Course files</p>
           <h2>Google Drive materials</h2>
         </div>
+        <a class="section-top-link" href="#courseTop">Back to top</a>
       </div>
       <div id="courseDriveMaterials" class="drive-materials" aria-live="polite"></div>
     </section>
-    <section class="study-section">
+    <section class="study-section anchored-section" id="class-helper">
       <div class="section-head">
         <div>
           <p class="eyebrow">Study helper</p>
           <h2>Ask about this class</h2>
         </div>
+        <a class="section-top-link" href="#courseTop">Back to top</a>
       </div>
       <div class="study-chat" id="studyChat"></div>
     </section>
