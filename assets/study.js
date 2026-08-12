@@ -63,12 +63,27 @@ function getItemText(item) {
   return String(item.text || item.summary || '').trim();
 }
 
+function getItemKind(item) {
+  if (item.kind) return item.kind;
+  if (item.text && !item.summary) return 'transcript';
+  if (item.summary && !item.text) return 'summary';
+  return 'recording';
+}
+
+function getKindLabel(kind) {
+  if (kind === 'summary') return 'Summary';
+  if (kind === 'transcript') return 'Transcript';
+  return 'Recording';
+}
+
 function createStoredItem(item, existingItem = {}) {
   const text = getItemText(item);
   return {
     id: existingItem.id || crypto.randomUUID(),
     sourceId: item.sourceId,
+    parentSourceId: item.parentSourceId || existingItem.parentSourceId || '',
     title: String(item.title || existingItem.title || 'Plaud recording').trim(),
+    kind: item.kind || existingItem.kind || getItemKind(item),
     classId: existingItem.classId || 'unassigned',
     text,
     summary: String(item.summary || '').trim(),
@@ -168,7 +183,7 @@ function renderClasses() {
         <div>
           <h3>${klass.name}</h3>
           <p>${klass.note}</p>
-          <p class="class-count">${count} recording${count === 1 ? '' : 's'}</p>
+          <p class="class-count">${count} item${count === 1 ? '' : 's'}</p>
         </div>
         <span class="button secondary">Open course</span>
       `;
@@ -185,7 +200,7 @@ function renderIntakeList() {
   intakeList.innerHTML = '';
 
   if (!items.length) {
-    intakeList.innerHTML = '<p class="study-note">No unsorted recordings right now.</p>';
+    intakeList.innerHTML = '<p class="study-note">No unsorted study materials right now.</p>';
     setSelectedItem(null);
     return;
   }
@@ -195,8 +210,9 @@ function renderIntakeList() {
     button.className = `intake-item${selected && selected.id === item.id ? ' active' : ''}`;
     button.type = 'button';
     button.dataset.recordingId = item.id;
+    const kindLabel = getKindLabel(getItemKind(item));
     button.innerHTML = `
-      <span class="meta">${item.recordedAt ? new Date(item.recordedAt).toLocaleDateString() : 'Plaud'}</span>
+      <span class="meta">${item.recordedAt ? new Date(item.recordedAt).toLocaleDateString() : 'Plaud'} · ${kindLabel}</span>
       <strong>${escapeHtml(item.title)}</strong>
       <span>${escapeHtml(item.summary ? getPreview(item.summary, 110) : getPreview(getItemText(item), 110))}</span>
     `;
@@ -211,14 +227,15 @@ function renderPreview() {
   if (!selected) {
     recordingPreview.innerHTML = `
       <p class="meta">Preview</p>
-      <h3>Select a recording</h3>
-      <p>Choose one from the list to check the summary and transcript before sending it to a class.</p>
+      <h3>Select an item</h3>
+      <p>Choose one from the list to check it before sending it to a class.</p>
     `;
     return;
   }
 
-  const summary = selected.summary || 'No Plaud summary is saved for this recording yet.';
-  const transcript = getItemText(selected) || 'No transcript text is saved for this recording yet.';
+  const kind = getItemKind(selected);
+  const kindLabel = getKindLabel(kind);
+  const content = getItemText(selected) || 'No text is saved for this item yet.';
   const controls = document.createElement('div');
   controls.className = 'preview-actions';
   const label = document.createElement('span');
@@ -226,12 +243,10 @@ function renderPreview() {
   controls.append(label, createClassSelect(selected));
 
   recordingPreview.innerHTML = `
-    <p class="meta">Preview</p>
+    <p class="meta">${kindLabel}</p>
     <h3>${escapeHtml(selected.title)}</h3>
-    <h4>Summary</h4>
-    <p>${escapeHtml(getPreview(summary, 520))}</p>
-    <h4>Transcript glance</h4>
-    <p>${escapeHtml(getPreview(transcript, 520))}</p>
+    <h4>${kindLabel} glance</h4>
+    <p>${escapeHtml(getPreview(content, 900))}</p>
   `;
   recordingPreview.append(controls);
 }
@@ -333,7 +348,12 @@ updateTranscripts.addEventListener('click', async () => {
     });
     const newItems = incoming
       .filter((item) => item.sourceId && !existingBySourceId.has(item.sourceId))
-      .map((item) => createStoredItem(item));
+      .map((item) => {
+        const parent = item.parentSourceId
+          ? saved.find((savedItem) => savedItem.sourceId === item.parentSourceId)
+          : null;
+        return createStoredItem(item, parent ? { classId: parent.classId } : {});
+      });
 
     if (!incoming.length && !staleCount) {
       plaudStatus.textContent = 'No new Lily recordings were ready to import.';
@@ -355,11 +375,11 @@ updateTranscripts.addEventListener('click', async () => {
     }
     renderAll();
     if (newItems.length) {
-      plaudStatus.textContent = `Added ${newItems.length} recording${newItems.length === 1 ? '' : 's'} to the sorting list.`;
+      plaudStatus.textContent = `Added ${newItems.length} item${newItems.length === 1 ? '' : 's'} to the sorting list.`;
     } else if (staleCount) {
-      plaudStatus.textContent = `Removed ${staleCount} old recording${staleCount === 1 ? '' : 's'} that are no longer in Cloudflare.`;
+      plaudStatus.textContent = `Removed ${staleCount} old item${staleCount === 1 ? '' : 's'} that are no longer in Cloudflare.`;
     } else {
-      plaudStatus.textContent = `Updated ${incomingBySourceId.size} existing recording${incomingBySourceId.size === 1 ? '' : 's'}.`;
+      plaudStatus.textContent = `Updated ${incomingBySourceId.size} existing item${incomingBySourceId.size === 1 ? '' : 's'}.`;
     }
   } catch {
     plaudStatus.textContent = 'The import endpoint is not available from this preview yet.';

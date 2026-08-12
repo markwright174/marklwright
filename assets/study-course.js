@@ -80,6 +80,23 @@ function getPreview(text, length = 360) {
   return clean.slice(0, length) + (clean.length > length ? '...' : '');
 }
 
+function getItemText(item) {
+  return String(item.text || item.summary || '').trim();
+}
+
+function getItemKind(item) {
+  if (item.kind) return item.kind;
+  if (item.text && !item.summary) return 'transcript';
+  if (item.summary && !item.text) return 'summary';
+  return 'recording';
+}
+
+function getKindLabel(kind) {
+  if (kind === 'summary') return 'Summary';
+  if (kind === 'transcript') return 'Transcript';
+  return 'Recording';
+}
+
 function escapeHtml(value) {
   return String(value).replace(/[&<>"']/g, (character) => ({
     '&': '&amp;',
@@ -118,10 +135,8 @@ function getEmptyMaterialsMessage() {
       <h3>No recording selected</h3>
     </div>
     <div class="detail-scroll">
-      <h4>Summary</h4>
-      <p>When a recording is selected, its summary will appear here.</p>
-      <h4>Transcript</h4>
-      <p>The full transcript will appear in this scrollable panel so longer recordings do not change the page shape.</p>
+      <h4>Study material</h4>
+      <p>When a summary or transcript is selected, its content will appear in this scrollable panel so longer materials do not change the page shape.</p>
     </div>
   `;
 }
@@ -130,7 +145,7 @@ function renderCourse() {
   const items = getCourseItems();
   const selected = getSelectedCourseItem(items);
   title.textContent = course.name;
-  count.textContent = `${items.length} recording${items.length === 1 ? '' : 's'} saved here`;
+  count.textContent = `${items.length} item${items.length === 1 ? '' : 's'} saved here`;
   list.innerHTML = '';
   list.classList.remove('single-column');
   list.classList.add('course-workbench');
@@ -145,9 +160,9 @@ function renderCourse() {
   if (!items.length) {
     recordingList.innerHTML = `
       <div class="empty-list-panel">
-        <p class="meta">Recordings</p>
-        <h3>No recordings yet</h3>
-        <p>When a recording is sent to ${escapeHtml(course.name)}, it will show up here.</p>
+        <p class="meta">Study materials</p>
+        <h3>No items yet</h3>
+        <p>When a summary or transcript is sent to ${escapeHtml(course.name)}, it will show up here.</p>
       </div>
     `;
     detail.innerHTML = getEmptyMaterialsMessage();
@@ -159,24 +174,24 @@ function renderCourse() {
     button.className = `course-recording-button${selected && selected.id === item.id ? ' active' : ''}`;
     button.type = 'button';
     button.dataset.recordingId = item.id;
+    const kindLabel = getKindLabel(getItemKind(item));
     button.innerHTML = `
-      <span class="meta">${getRecordingDateLabel(item)}</span>
+      <span class="meta">${getRecordingDateLabel(item)} · ${kindLabel}</span>
       <strong>${escapeHtml(item.title)}</strong>
-      <span>${escapeHtml(item.summary ? getPreview(item.summary, 120) : getPreview(item.text, 120))}</span>
+      <span>${escapeHtml(getPreview(getItemText(item), 120))}</span>
     `;
     recordingList.append(button);
   });
 
+  const selectedKindLabel = getKindLabel(getItemKind(selected));
   detail.innerHTML = `
     <div class="detail-head">
-      <p class="meta">${getRecordingDateLabel(selected)}</p>
+      <p class="meta">${getRecordingDateLabel(selected)} · ${selectedKindLabel}</p>
       <h3>${escapeHtml(selected.title)}</h3>
     </div>
     <div class="detail-scroll">
-      <h4>Summary</h4>
-      <p>${escapeHtml(selected.summary || 'No Plaud summary is saved for this recording yet.')}</p>
-      <h4>Transcript</h4>
-      <p>${escapeHtml(selected.text || 'No transcript text is saved for this recording yet.')}</p>
+      <h4>${selectedKindLabel}</h4>
+      <p>${escapeHtml(getItemText(selected) || 'No text is saved for this item yet.')}</p>
     </div>
   `;
 
@@ -197,7 +212,7 @@ function renderChat() {
       <div class="chat-controls">
         <label for="chatRecording">Use recording</label>
         <select id="chatRecording" disabled>
-          <option>No recordings saved yet</option>
+          <option>No study materials saved yet</option>
         </select>
 
         <div class="mode-row" aria-label="Study actions">
@@ -211,11 +226,11 @@ function renderChat() {
         <label for="chatQuestion">Question</label>
         <textarea id="chatQuestion" rows="4" placeholder="Course-specific help will be available after a recording is saved here." disabled></textarea>
         <button class="button primary" type="button" disabled>Ask study helper</button>
-        <p class="chat-status">Waiting for a course recording.</p>
+        <p class="chat-status">Waiting for a course item.</p>
       </div>
       <div class="chat-answer" aria-live="polite">
         <h3>Class helper ready</h3>
-        <p>After a recording is saved to ${escapeHtml(course.name)}, this helper can use that transcript as context. General questions can still go through the helper on the Study home page.</p>
+        <p>After a summary or transcript is saved to ${escapeHtml(course.name)}, this helper can use that material as context. General questions can still go through the helper on the Study home page.</p>
       </div>
     `;
     return;
@@ -242,7 +257,7 @@ function renderChat() {
       <p class="chat-status" id="chatStatus">Free-use guardrails are on. The helper stops after the daily limit.</p>
     </div>
     <div class="chat-answer" id="chatAnswer" aria-live="polite">
-      <p>Select a recording and ask for a small piece of help.</p>
+      <p>Select a class item and ask for a small piece of help.</p>
     </div>
   `;
 
@@ -276,7 +291,7 @@ function renderChat() {
           question,
           contextTitle: selected.title,
           contextSummary: selected.summary,
-          contextText: selected.text,
+          contextText: getItemText(selected),
         }),
       });
       const result = await response.json();

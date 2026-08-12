@@ -167,6 +167,8 @@ function parseStudyContent(text) {
     summary: summary || cleaned.slice(0, 4000),
     transcript: transcript || cleaned,
     rawText: cleaned,
+    hasLabeledSummary: Boolean(summary),
+    hasLabeledTranscript: Boolean(transcript),
   };
 }
 
@@ -207,10 +209,61 @@ async function parseMessage(message) {
     rawText: content.rawText,
     fromEmail: parsed.from || message.from || null,
     receivedAt: new Date().toISOString(),
+    hasSeparateSummary: Boolean(plaudText.summary || content.hasLabeledSummary),
+    hasSeparateTranscript: Boolean(plaudText.transcript || content.hasLabeledTranscript),
   };
 }
 
-async function storeTranscript(env, item) {
+function buildTranscriptRows(item) {
+  const rows = [];
+  const summary = normalizeText(item.summary);
+  const transcript = normalizeText(item.transcript);
+  const hasDistinctSummary = item.hasSeparateSummary && summary && summary !== transcript;
+  const hasTranscript = transcript && (!hasDistinctSummary || item.hasSeparateTranscript || transcript !== summary);
+
+  if (hasDistinctSummary) {
+    rows.push({
+      sourceId: `${item.sourceId}:summary`,
+      title: `${item.title} - Summary`,
+      recordedAt: item.recordedAt,
+      summary,
+      transcript: '',
+      rawText: item.rawText,
+      fromEmail: item.fromEmail,
+      receivedAt: item.receivedAt,
+    });
+  }
+
+  if (hasTranscript) {
+    rows.push({
+      sourceId: `${item.sourceId}:transcript`,
+      title: `${item.title} - Transcript`,
+      recordedAt: item.recordedAt,
+      summary: '',
+      transcript,
+      rawText: item.rawText,
+      fromEmail: item.fromEmail,
+      receivedAt: item.receivedAt,
+    });
+  }
+
+  if (!rows.length && summary) {
+    rows.push({
+      sourceId: `${item.sourceId}:notes`,
+      title: item.title,
+      recordedAt: item.recordedAt,
+      summary,
+      transcript: '',
+      rawText: item.rawText,
+      fromEmail: item.fromEmail,
+      receivedAt: item.receivedAt,
+    });
+  }
+
+  return rows;
+}
+
+async function storeTranscriptRow(env, item) {
   return env.STUDY_DB.prepare(`
     INSERT OR IGNORE INTO study_transcripts
       (source_id, title, recorded_at, summary, transcript, raw_text, from_email, received_at)
@@ -225,6 +278,16 @@ async function storeTranscript(env, item) {
     item.fromEmail,
     item.receivedAt,
   ).run();
+}
+
+async function storeTranscriptItems(env, item) {
+  const rows = buildTranscriptRows(item);
+  let changes = 0;
+  for (const row of rows) {
+    const result = await storeTranscriptRow(env, row);
+    changes += result?.meta?.changes || 0;
+  }
+  return { changes, rows };
 }
 
 async function logEmailEvent(env, details) {
@@ -330,11 +393,12 @@ export default {
         return;
       }
 
-      const result = await storeTranscript(env, item);
-      const changes = result?.meta?.changes || 0;
+      const result = await storeTranscriptItems(env, item);
+      const changes = result.changes;
       await logEmailEvent(env, {
         ...diagnostic,
         status: changes ? 'stored' : 'duplicate_ignored',
+        errorDetail: `${result.rows.length} item${result.rows.length === 1 ? '' : 's'} parsed`,
       });
     } catch (error) {
       const messageText = error instanceof Error ? error.message : String(error);

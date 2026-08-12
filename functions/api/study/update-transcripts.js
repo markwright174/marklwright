@@ -233,10 +233,12 @@ async function getD1Items(env) {
 
   return (result.results || []).map((row) => ({
     sourceId: row.source_id,
+    parentSourceId: row.source_id.replace(/:(summary|transcript|notes)$/, ''),
     title: row.title,
     recordedAt: row.recorded_at || row.received_at,
     text: row.transcript || '',
     summary: row.summary || '',
+    kind: row.transcript ? 'transcript' : 'summary',
   }));
 }
 
