@@ -398,6 +398,16 @@ a:hover{color:var(--accent-strong)}
   font-size:.95rem;
 }
 
+.context-note{
+  max-width:860px;
+  margin:22px 0 0;
+  padding:18px 20px;
+  border-left:4px solid var(--gold);
+  border-radius:0 8px 8px 0;
+  background:rgba(255,255,255,.62);
+  color:var(--muted);
+}
+
 .portfolio-lane{
   margin-top:46px;
 }
