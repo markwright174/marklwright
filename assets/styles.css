@@ -253,6 +253,10 @@ a:hover{color:var(--accent-strong)}
   margin-top:42px;
 }
 
+.compact-category-grid{
+  margin-top:0;
+}
+
 .home-category-grid{
   margin-top:0;
 }
@@ -353,6 +357,49 @@ a:hover{color:var(--accent-strong)}
   background:var(--soft);
   color:var(--accent-strong);
   font-weight:700;
+}
+
+.credential-strip{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:18px;
+}
+
+.credential-strip span{
+  display:inline-flex;
+  align-items:center;
+  min-height:36px;
+  padding:0 12px;
+  border-left:3px solid var(--gold);
+  background:rgba(255,255,255,.7);
+  color:var(--text);
+  font-weight:700;
+}
+
+.credential-grid{
+  display:grid;
+  grid-template-columns:repeat(4, minmax(0, 1fr));
+  gap:14px;
+}
+
+.credential-card{
+  min-height:100%;
+  padding:18px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:var(--panel);
+  box-shadow:var(--shadow);
+}
+
+.credential-card h3{
+  margin:0 0 8px;
+  line-height:1.2;
+}
+
+.credential-card p:last-child{
+  margin:0;
+  color:var(--muted);
 }
 
 .timeline-item + .timeline-item{
@@ -484,6 +531,7 @@ a:hover{color:var(--accent-strong)}
   .two-column,
   .card-grid,
   .portfolio-preview-grid,
+  .credential-grid,
   .category-grid{
     grid-template-columns:1fr;
   }
