@@ -1,6 +1,6 @@
 # Public Profile Brief
 
-Source: distilled from local career reference materials on 2026-08-05.
+Source: distilled from local career reference materials on 2026-08-05 and updated with the Manager, Instructional Designer job description supplied on 2026-08-14.
 
 This file is safe to use for public website copy. It intentionally excludes phone number, compensation targets, job-search workflow, and application-tracker details.
 
@@ -16,6 +16,8 @@ His work sits where complex content, diverse learners, faculty or stakeholder co
 - Leads instructional design strategy and execution across multiple programs and large course portfolios.
 - Manages an Agile instructional design team.
 - Coordinates collaborative course development with faculty, students, and stakeholders.
+- Manages course-development projects from planning through completion, including timelines, progress communication, roadblocks, and quality expectations.
+- Supports online and hybrid course design, course review, accessibility expectations, and instructional design team development.
 - Directs proficiency-based education transition work, including curriculum deconstruction, competency alignment, implementation planning, and course-development prioritization.
 
 ## Core Strengths
@@ -24,6 +26,7 @@ His work sits where complex content, diverse learners, faculty or stakeholder co
 - Leading cross-functional work from concept through delivery.
 - Building structure around messy curriculum, course, and learning-operations work.
 - Keeping learning quality, stakeholders, timelines, and implementation realities aligned.
+- Supervising and mentoring instructional designers while keeping project work visible and moving.
 - Creating durable support resources, training sites, and documentation systems.
 - Applying accessibility and universal design expectations to learning platforms and course materials.
 - Using AI tools pragmatically for assessment generation, curriculum review, outcome design, pattern seeking, and content refinement.
