@@ -155,6 +155,35 @@ a:hover{color:var(--accent-strong)}
   padding:24px;
 }
 
+.hero-profile{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  margin-bottom:18px;
+  padding-bottom:18px;
+  border-bottom:1px solid var(--line);
+}
+
+.hero-profile p{
+  margin:0;
+  color:var(--muted);
+}
+
+.hero-profile .meta{
+  margin-bottom:2px;
+  color:var(--text);
+}
+
+.hero-headshot{
+  flex:0 0 auto;
+  width:86px;
+  aspect-ratio:1;
+  border:3px solid #fff;
+  border-radius:50%;
+  object-fit:cover;
+  box-shadow:0 10px 24px rgba(32,33,36,.16);
+}
+
 .signal-card h2,
 .work-card h2,
 .work-card h3,
@@ -336,6 +365,11 @@ a:hover{color:var(--accent-strong)}
   border:0;
 }
 
+.rise-frame{
+  aspect-ratio:4 / 3;
+  min-height:620px;
+}
+
 .artifact-preview{
   overflow:hidden;
   max-width:900px;
@@ -434,6 +468,10 @@ a:hover{color:var(--accent-strong)}
 
   .artifact-frame{
     min-height:300px;
+  }
+
+  .rise-frame{
+    min-height:520px;
   }
 }
 

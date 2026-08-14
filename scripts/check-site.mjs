@@ -7,7 +7,7 @@ const hrefs = [];
 
 async function walk(dir) {
   for (const entry of await readdir(dir)) {
-    if (entry === '.git' || entry === 'node_modules' || entry === 'artifacts' || entry === 'dist') continue;
+    if (entry === '.git' || entry === '.tmp' || entry === 'node_modules' || entry === 'artifacts' || entry === 'dist') continue;
     const full = path.join(dir, entry);
     const info = await stat(full);
     if (info.isDirectory()) await walk(full);
