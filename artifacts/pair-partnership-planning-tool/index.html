@@ -1,0 +1,625 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pair Partnership Planning Tool</title>
+  <style>
+    :root {
+      --ink: #17212b;
+      --muted: #5f6f7a;
+      --navy: #17324d;
+      --blue: #256b8a;
+      --teal: #2f7d72;
+      --gold: #e4ae3a;
+      --sand: #f7f3ea;
+      --mist: #eef6f6;
+      --paper: #ffffff;
+      --line: #d9e4e8;
+      --shadow: 0 18px 45px rgba(23, 50, 77, 0.13);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "Inter", "Segoe UI", Roboto, Arial, sans-serif;
+      line-height: 1.55;
+      background:
+        radial-gradient(circle at top left, rgba(37, 107, 138, 0.18), transparent 28rem),
+        radial-gradient(circle at 80% 20%, rgba(228, 174, 58, 0.16), transparent 24rem),
+        linear-gradient(180deg, #fbfaf6 0%, #eef6f6 100%);
+    }
+
+    .wrap {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    header {
+      padding: 66px 0 30px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 13px;
+      color: var(--navy);
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(23, 50, 77, 0.14);
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.045em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow:before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--gold);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+      gap: 34px;
+      align-items: end;
+      margin-top: 26px;
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--navy);
+      font-size: clamp(2.5rem, 6vw, 5.6rem);
+      line-height: 0.93;
+      letter-spacing: -0.065em;
+      max-width: 880px;
+    }
+
+    .subtitle {
+      margin: 22px 0 0;
+      max-width: 760px;
+      color: var(--muted);
+      font-size: 1.18rem;
+    }
+
+    .hero-card {
+      background: var(--paper);
+      border: 1px solid rgba(23, 50, 77, 0.12);
+      border-radius: 30px;
+      padding: 26px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero-card h2 {
+      margin: 0 0 10px;
+      color: var(--navy);
+      font-size: 1.35rem;
+      line-height: 1.12;
+    }
+
+    .hero-card p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .principle-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin: 28px 0 34px;
+    }
+
+    .principle {
+      background: rgba(255, 255, 255, 0.74);
+      border: 1px solid rgba(23, 50, 77, 0.1);
+      border-radius: 20px;
+      padding: 18px;
+    }
+
+    .principle strong {
+      display: block;
+      color: var(--navy);
+      margin-bottom: 5px;
+    }
+
+    .principle span {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    main {
+      padding-bottom: 58px;
+    }
+
+    section {
+      margin: 22px 0;
+    }
+
+    .panel {
+      background: var(--paper);
+      border: 1px solid rgba(23, 50, 77, 0.12);
+      border-radius: 30px;
+      padding: 30px;
+      box-shadow: 0 12px 32px rgba(23, 50, 77, 0.08);
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      color: var(--navy);
+      font-size: clamp(1.55rem, 3vw, 2.35rem);
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+    }
+
+    h3 {
+      margin: 0 0 8px;
+      color: var(--blue);
+      font-size: 1.2rem;
+      letter-spacing: -0.02em;
+    }
+
+    p {
+      margin: 0 0 14px;
+    }
+
+    p:last-child {
+      margin-bottom: 0;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+    }
+
+    .role-card {
+      border-radius: 24px;
+      padding: 24px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, #ffffff 0%, #f8fbfb 100%);
+    }
+
+    .role-card .label {
+      display: inline-block;
+      margin-bottom: 12px;
+      padding: 6px 11px;
+      border-radius: 999px;
+      background: var(--mist);
+      color: var(--blue);
+      font-size: 0.8rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .callout {
+      background: var(--navy);
+      color: white;
+      border-radius: 30px;
+      padding: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .callout:after {
+      content: "";
+      position: absolute;
+      right: -55px;
+      top: -55px;
+      width: 145px;
+      height: 145px;
+      border-radius: 50%;
+      border: 24px solid rgba(228, 174, 58, 0.35);
+    }
+
+    .callout h2,
+    .callout h3 {
+      color: white;
+    }
+
+    .callout p,
+    .callout li {
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .cadence {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .cadence-card {
+      background: var(--sand);
+      border: 1px solid rgba(23, 50, 77, 0.1);
+      border-radius: 20px;
+      padding: 18px;
+      min-height: 160px;
+    }
+
+    .cadence-card .time {
+      color: var(--teal);
+      font-weight: 900;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.045em;
+    }
+
+    .cadence-card strong {
+      display: block;
+      margin: 8px 0;
+      color: var(--navy);
+      font-size: 1.05rem;
+    }
+
+    ul {
+      margin: 12px 0 0;
+      padding-left: 1.25rem;
+    }
+
+    li {
+      margin: 0.32rem 0;
+    }
+
+    .check-list {
+      list-style: none;
+      padding: 0;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px 16px;
+    }
+
+    .check-list li {
+      margin: 0;
+      padding: 14px 15px 14px 44px;
+      border-radius: 16px;
+      background: var(--mist);
+      position: relative;
+    }
+
+    .check-list li:before {
+      content: "✓";
+      position: absolute;
+      left: 14px;
+      top: 15px;
+      width: 22px;
+      height: 22px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--teal);
+      color: white;
+      font-weight: 900;
+      font-size: 0.82rem;
+    }
+
+    details {
+      margin: 12px 0;
+      padding: 16px 18px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fbfdfd;
+    }
+
+    summary {
+      cursor: pointer;
+      color: var(--navy);
+      font-weight: 850;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 18px;
+      border-collapse: collapse;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      overflow: hidden;
+      display: block;
+      overflow-x: auto;
+      background: white;
+      font-size: 0.94rem;
+    }
+
+    th,
+    td {
+      border: 1px solid var(--line);
+      padding: 13px 14px;
+      vertical-align: top;
+      min-width: 160px;
+    }
+
+    th {
+      background: var(--mist);
+      color: var(--navy);
+      text-align: left;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin-top: 18px;
+      counter-reset: flow;
+    }
+
+    .flow-step {
+      counter-increment: flow;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+      position: relative;
+    }
+
+    .flow-step:before {
+      content: counter(flow);
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 10px;
+      background: var(--gold);
+      color: #3c2a04;
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+
+    .flow-step strong {
+      color: var(--navy);
+    }
+
+    footer {
+      color: var(--muted);
+      padding: 0 0 56px;
+      font-size: 0.92rem;
+    }
+
+    .source-note {
+      border: 1px dashed rgba(23, 50, 77, 0.28);
+      border-radius: 20px;
+      padding: 18px;
+      background: rgba(255, 255, 255, 0.66);
+    }
+
+    @media (max-width: 900px) {
+      .hero,
+      .two-col,
+      .principle-strip,
+      .cadence,
+      .check-list,
+      .flow {
+        grid-template-columns: 1fr;
+      }
+
+      header {
+        padding-top: 42px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="wrap">
+    <span class="eyebrow">Team enablement / learning operations</span>
+    <div class="hero">
+      <div>
+        <h1>Pair Partnership Planning Tool</h1>
+        <p class="subtitle">A lightweight operating model for collaborative instructional design work: enough structure to support continuity, quality, and growth without squeezing the human judgment out of the relationship.</p>
+      </div>
+      <aside class="hero-card">
+        <h2>Structure for improvisation</h2>
+        <p>The tool gives pairs a shared cadence, documentation habits, and escalation path. Each pair still adapts the relationship to their work, programs, personalities, and constraints.</p>
+      </aside>
+    </div>
+
+    <div class="principle-strip" aria-label="Core design principles">
+      <div class="principle"><strong>Shared context</strong><span>No program should depend on one person holding all the history.</span></div>
+      <div class="principle"><strong>Peer quality</strong><span>Important changes get another thoughtful set of eyes.</span></div>
+      <div class="principle"><strong>Coverage</strong><span>Partners can step in when PTO, urgency, or shifting priorities require it.</span></div>
+      <div class="principle"><strong>Growth</strong><span>Pairs trade tools, patterns, and practices as part of the work.</span></div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="panel">
+      <h2>Why this exists</h2>
+      <p>Pairing people does not automatically create collaboration. Without a shared structure, one partner may not know what context matters, when to step in, how to track decisions, or when a concern needs to be escalated. With too much structure, the partnership becomes a compliance routine instead of a useful professional relationship.</p>
+      <p>This planning tool sits in the middle. It defines the minimum expectations for partnership while leaving room for each pair to personalize how they communicate, document, solve problems, and support each other.</p>
+    </section>
+
+    <section class="two-col">
+      <div class="role-card">
+        <span class="label">Role 1</span>
+        <h3>Primary partner</h3>
+        <p>Owns the day-to-day deliverables for assigned programs, projects, or stakeholder groups. The primary partner remains accountable for quality, timelines, and communication.</p>
+      </div>
+
+      <div class="role-card">
+        <span class="label">Role 2</span>
+        <h3>Peer partner</h3>
+        <p>Maintains enough context to provide informed thought partnership, backup coverage, peer review, and practical support when the work becomes complex or time-sensitive.</p>
+      </div>
+    </section>
+
+    <section class="callout">
+      <h2>Important boundary</h2>
+      <p>Partnership is not performance evaluation, and it is not a substitute for individual ownership. The relationship should make work more visible, resilient, and thoughtful. It should not become a way to hide poor follow-through or shift accountability to someone else.</p>
+    </section>
+
+    <section class="panel">
+      <h2>Core norms</h2>
+      <ul class="check-list">
+        <li>Assume positive intent; be candid, kind, and direct.</li>
+        <li>Share progress, concerns, and decisions early.</li>
+        <li>Document key decisions and action items where either partner can find them.</li>
+        <li>Respect confidentiality and escalate sensitive matters appropriately.</li>
+        <li>Keep it lightweight: short check-ins and useful notes beat long meetings with no trail.</li>
+        <li>Use shared templates and checklists when the work is recurring or high-risk.</li>
+      </ul>
+    </section>
+
+    <section class="panel">
+      <h2>Minimum partnership cadence</h2>
+      <p>Pairs can meet more often when the work calls for it, but the baseline cadence keeps the relationship active enough to be useful.</p>
+      <div class="cadence">
+        <div class="cadence-card">
+          <span class="time">Bi-weekly</span>
+          <strong>Partner sync</strong>
+          <p>Share priorities, deadlines, blockers, quick quality checks, and next steps.</p>
+        </div>
+        <div class="cadence-card">
+          <span class="time">Monthly</span>
+          <strong>Deep dive</strong>
+          <p>Walk through one active project, compare process patterns, and choose one improvement experiment.</p>
+        </div>
+        <div class="cadence-card">
+          <span class="time">Milestones</span>
+          <strong>Coverage check</strong>
+          <p>Prepare for course starts, major deadlines, PTO, or other moments where continuity matters.</p>
+        </div>
+        <div class="cadence-card">
+          <span class="time">Quarterly</span>
+          <strong>Reflection</strong>
+          <p>Capture wins, learning, and one or two growth goals for the next quarter.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Meeting and tracking templates</h2>
+
+      <details open>
+        <summary>Partner sync notes</summary>
+        <ul>
+          <li>Current priorities for each partner</li>
+          <li>Upcoming deadlines or stakeholder commitments</li>
+          <li>Concerns, blockers, or at-concern work</li>
+          <li>Quality reviews needed</li>
+          <li>Decisions made</li>
+          <li>Action items with owner and due date</li>
+          <li>Quick tip, reusable asset, or pattern shared</li>
+        </ul>
+      </details>
+
+      <details>
+        <summary>Program or project snapshot</summary>
+        <ul>
+          <li>Current priorities for the next two to four weeks</li>
+          <li>Open concerns, likely impact, and mitigation</li>
+          <li>Recent decisions and rationale</li>
+          <li>Key links, trackers, shared folders, and request forms</li>
+          <li>Known risks, landmines, or areas that should not be changed without discussion</li>
+        </ul>
+      </details>
+
+      <details>
+        <summary>Coverage handoff checklist</summary>
+        <ul>
+          <li>Dates of coverage and best contact method</li>
+          <li>Hard deadlines during the coverage window</li>
+          <li>Stakeholder expectations already set</li>
+          <li>Current top concerns and what to do if they worsen</li>
+          <li>Where to find current files, trackers, and notes</li>
+          <li>Anything the partner should avoid changing without approval</li>
+        </ul>
+      </details>
+
+      <details>
+        <summary>Quarterly reflection prompts</summary>
+        <ul>
+          <li>Communication: what is working well with stakeholders, and what gaps need attention?</li>
+          <li>Job knowledge: what tool, process, or standard did you learn?</li>
+          <li>Ownership: what did you deliver, and where did you hit bottlenecks?</li>
+          <li>Teamwork: where did you support others or improve a shared process?</li>
+          <li>Growth: what one or two SMART goals should guide the next quarter?</li>
+        </ul>
+      </details>
+    </section>
+
+    <section class="panel">
+      <h2>Supplemental tracker model</h2>
+      <p>The companion tracker gives pairs a simple way to capture collaboration without overbuilding the system. It can live in a spreadsheet, shared document, project board, or whatever tool the team already uses.</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Field</th>
+            <th>Purpose</th>
+            <th>Example use</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th>Communication method</th>
+            <td>Clarifies how the pair usually connects.</td>
+            <td>Meeting, chat, shared document, async note.</td>
+          </tr>
+          <tr>
+            <th>Check-in date</th>
+            <td>Keeps the partnership active and reviewable.</td>
+            <td>Latest sync or planned next touchpoint.</td>
+          </tr>
+          <tr>
+            <th>Partner project/request</th>
+            <td>Identifies the shared work item.</td>
+            <td>Template review, course refresh, coverage task, process question.</td>
+          </tr>
+          <tr>
+            <th>Deliverable</th>
+            <td>Defines what will exist when the work is done.</td>
+            <td>Checklist, reviewed module, updated notes, handoff, recommendation.</td>
+          </tr>
+          <tr>
+            <th>Owner and status</th>
+            <td>Makes responsibility and movement visible.</td>
+            <td>Primary owner, in progress, waiting, completed.</td>
+          </tr>
+          <tr>
+            <th>Expected completion and notes</th>
+            <td>Captures timing, decisions, and context.</td>
+            <td>Due date, risks, follow-up needed, stakeholder note.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="panel">
+      <h2>Concern and escalation path</h2>
+      <p>When a concern appears, the partnership gives the team a small, repeatable way to move from ambiguity to action.</p>
+      <div class="flow">
+        <div class="flow-step"><strong>Name it.</strong><p>What is stuck, sensitive, late, unclear, or risky?</p></div>
+        <div class="flow-step"><strong>Clarify it.</strong><p>What decision is needed, by when, and who owns it?</p></div>
+        <div class="flow-step"><strong>Options.</strong><p>Identify practical choices, tradeoffs, and constraints.</p></div>
+        <div class="flow-step"><strong>Recommend.</strong><p>Choose the smallest useful next action.</p></div>
+        <div class="flow-step"><strong>Escalate.</strong><p>Inform the manager early when stakeholders or deadlines are impacted.</p></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>How to adapt it</h2>
+      <p>This is a foundation, not a finished answer. A team should change the cadence, templates, tracker fields, and escalation language to match its actual work.</p>
+      <ul class="check-list">
+        <li>Keep the minimum expectations small enough that people will actually use them.</li>
+        <li>Make documentation predictable, but not performative.</li>
+        <li>Use the tracker for shared visibility, not surveillance.</li>
+        <li>Adjust meeting depth based on risk, urgency, and project complexity.</li>
+        <li>Review the system quarterly and remove anything that is not earning its keep.</li>
+        <li>Protect confidentiality and avoid capturing sensitive details that do not belong in shared notes.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="wrap">
+    <div class="source-note">
+      <p><strong>Development note:</strong> This portfolio object was rebuilt from an internal partnership plan and supplemental tracking workbook. The public version keeps the operating model while removing live staff notes, program-specific details, and institution-specific references.</p>
+    </div>
+  </footer>
+</body>
+</html>
