@@ -1,42 +1,30 @@
 # marklwright
 
-Personal web home for Mark L. Wright.
+Personal portfolio and family study site, published through Cloudflare Pages from `markwright174/marklwright`.
 
-This repository is intended to grow into a unified web workspace for:
+The portfolio is public. `/study/` and `/api/study/*` run through Pages Functions middleware. Family members enter the shared password once and receive a signed, Secure, HttpOnly cookie for 30 days. The password is held in the Pages Production secret `STUDY_ACCESS_PASSWORD`; a separate random `STUDY_SESSION_SECRET` signs cookies. Neither belongs in Git or a client asset. The login page and all study responses send `noindex, nofollow` and avoid caching. This is a convenient family gate, so rotate the shared password before using it for sensitive material, especially because an older version was in Git history.
 
-- a personal portfolio and experience site
-- portfolio case studies and selected work samples
-- a migrated archive of older blog writing
-- education transcript/notes tools and sites
-- possibly a future web-accessible version of the self-hosted dashboard
+## Cloudflare configuration
 
-## Current shape
+- Pages project: `marklwright`, Production branch: `main`, build command: `npm run build:cloudflare`, output directory: `dist`.
+- Pages Production secrets: `STUDY_ACCESS_PASSWORD` (family password) and `STUDY_SESSION_SECRET` (independent long random value). Set secrets for Preview as well before using previews with private content.
+- Pages bindings: D1 database `STUDY_DB` and Workers AI `AI`, as declared in `wrangler.jsonc`.
+- Pages runtime: **Fail closed**. If the free Pages Functions allowance is exhausted, static study files must not bypass middleware.
+- The separate `lily-notes-email` Worker uses `STUDY_ACCESS_PASSWORD` for its diagnostics endpoint. Its Wrangler config no longer stores the password; add it as an encrypted Worker secret before redeploying that Worker. Email ingestion does not use the diagnostics password.
+- The AI helper reserves at most 25 requests per UTC day in D1 before calling Workers AI. If D1 is unavailable, the helper returns an error rather than using AI without a limit. Free plan platform quotas can still stop service earlier.
 
-The first draft is a plain static site with no build dependencies. This keeps the
-initial Cloudflare Pages setup simple while the content strategy is still forming.
+Cloudflare's Workers Free plan, Pages Functions free allowance, D1 free allocation, and Workers AI free allocation are used here. Check the account plan and current platform limits before changing bindings or enabling paid usage.
 
-Suggested Cloudflare Pages settings:
+## Local checks
 
-- Framework preset: `None`
-- Build command: leave blank
-- Build output directory: `/`
-- Production branch: `main`
-
-Later, this can move to Astro, Next.js static export, or another content-oriented
-framework if the blog/archive/transcript features need it.
-
-## Local preview
-
-Open `index.html` directly, or run a simple static server from this folder:
+Run from this directory:
 
 ```powershell
-python -m http.server 8788
+npm test
+npm run check
+npm run build:cloudflare
 ```
 
-Then open `http://localhost:8788`.
+The tests cover the login gate and AI request limit. A basic static preview can use `python -m http.server 8788`, but it does not run Pages Functions and therefore cannot verify authentication. Verify the deployed gate through the Cloudflare Pages URL after publication.
 
-## Validation
-
-```powershell
-node scripts/check-site.mjs
-```
+The source of record is `Projects/marklwright/` in the parent `codingDesign` repository. Commit there, then use `scripts/publish-portfolio.ps1 -Push` from the parent repository to update the publication repository and trigger Cloudflare Pages.

@@ -7,10 +7,6 @@ html{
   scroll-padding-top:116px;
 }
 
-.study-gated .study-shell{
-  display:none;
-}
-
 .study-access-gate{
   display:grid;
   min-height:100vh;

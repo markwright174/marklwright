@@ -9,8 +9,7 @@
     "head_sampling_rate": 1
   },
   "vars": {
-    "ALLOWED_RECIPIENT": "lily-notes@marklwright.com",
-    "STUDY_ACCESS_PASSWORD": "lily-study"
+    "ALLOWED_RECIPIENT": "lily-notes@marklwright.com"
   },
   "d1_databases": [
     {

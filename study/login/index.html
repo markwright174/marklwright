@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Family study workspace sign in.">
+  <title>Study Access | Mark L. Wright</title>
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="stylesheet" href="/assets/study.css">
+</head>
+<body class="study-body">
+  <main class="study-access-gate">
+    <form class="study-access-card" id="studyLogin">
+      <p class="eyebrow">Family study space</p>
+      <h1>Study access</h1>
+      <p>Enter the family password. This device will stay signed in for 30 days.</p>
+      <label for="studyAccessPassword">Password</label>
+      <input id="studyAccessPassword" type="password" autocomplete="current-password" required>
+      <button class="button primary" type="submit">Open study site</button>
+      <p class="study-access-error" id="studyAccessError" role="status" aria-live="polite"></p>
+    </form>
+  </main>
+  <script src="/assets/study-login.js"></script>
+</body>
+</html>

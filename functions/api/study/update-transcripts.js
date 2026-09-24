@@ -3,7 +3,6 @@ const LILY_PLAUD_SERIAL = '8810B30300523466';
 const LOOKBACK_DAYS = 3;
 const MAX_IMPORT_ITEMS = 12;
 const PLAUD_USER_AGENT = 'Mozilla/5.0 (compatible; MarkLWrightStudyWorkspace/0.1)';
-const STUDY_ACCESS_CODE = 'lily-study';
 
 function json(data, init = {}) {
   return Response.json(data, {
@@ -17,10 +16,6 @@ function json(data, init = {}) {
 
 function getApiBase(env) {
   return env.PLAUD_API_BASE || DEFAULT_PLAUD_API_BASE;
-}
-
-function hasStudyAccess(request) {
-  return request.headers.get('X-Study-Access') === STUDY_ACCESS_CODE;
 }
 
 function getSinceDate() {
@@ -317,18 +312,6 @@ async function getPlaudItems(env) {
 }
 
 export async function onRequestPost({ request, env }) {
-  if (!hasStudyAccess(request)) {
-    return json(
-      {
-        ok: false,
-        code: 'STUDY_ACCESS_REQUIRED',
-        message: 'Open the Study page with the family password first.',
-        items: [],
-      },
-      { status: 401 },
-    );
-  }
-
   try {
     const result = await getPlaudItems(env);
     return json(result.body, { status: result.status });
@@ -346,18 +329,7 @@ export async function onRequestPost({ request, env }) {
   }
 }
 
-export async function onRequestGet({ request, env }) {
-  if (!hasStudyAccess(request)) {
-    return json(
-      {
-        ok: false,
-        code: 'STUDY_ACCESS_REQUIRED',
-        message: 'Open the Study page with the family password first.',
-      },
-      { status: 401 },
-    );
-  }
-
+export async function onRequestGet({ env }) {
   return json({
     ok: true,
     service: 'study-transcript-import',

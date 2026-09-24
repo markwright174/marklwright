@@ -87,11 +87,11 @@ function createStoredCourseItem(item, existingItem = {}, options = {}) {
 }
 
 async function persistMaterialChange(item, changes) {
-  if (!item?.sourceId || !window.getStudyAccessHeaders) return;
+  if (!item?.sourceId) return;
   try {
     await fetch('/api/study/assign-material', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...window.getStudyAccessHeaders() },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ sourceId: item.sourceId, ...changes }),
     });
   } catch {
@@ -174,11 +174,9 @@ function getAllCourseItems() {
 }
 
 async function syncCourseItemsFromCloudflare() {
-  if (!window.getStudyAccessHeaders) return;
 
   try {
     const response = await fetch(`/api/study/course-materials?classId=${encodeURIComponent(course.id)}`, {
-      headers: window.getStudyAccessHeaders(),
     });
     if (!response.ok) return;
     const result = await response.json();
@@ -535,7 +533,7 @@ function renderChat() {
     try {
       const response = await fetch('/api/study/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...window.getStudyAccessHeaders() },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           mode: selectedMode,
           question,

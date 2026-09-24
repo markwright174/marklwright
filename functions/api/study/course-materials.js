@@ -1,5 +1,3 @@
-const STUDY_ACCESS_CODE = 'lily-study';
-
 function json(data, init = {}) {
   return Response.json(data, {
     headers: {
@@ -8,10 +6,6 @@ function json(data, init = {}) {
     },
     ...init,
   });
-}
-
-function hasStudyAccess(request) {
-  return request.headers.get('X-Study-Access') === STUDY_ACCESS_CODE;
 }
 
 function rowToItem(row) {
@@ -28,10 +22,6 @@ function rowToItem(row) {
 }
 
 export async function onRequestGet({ request, env }) {
-  if (!hasStudyAccess(request)) {
-    return json({ ok: false, message: 'Study access required.', items: [] }, { status: 401 });
-  }
-
   if (!env.STUDY_DB) {
     return json({ ok: true, source: 'local-only', items: [] });
   }

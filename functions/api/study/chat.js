@@ -3,15 +3,14 @@ const DAILY_REQUEST_LIMIT = 25;
 const MAX_QUESTION_CHARS = 700;
 const MAX_CONTEXT_CHARS = 4500;
 const MAX_COMPLETION_TOKENS = 450;
-const STUDY_ACCESS_CODE = 'lily-study';
 
 function json(data, init = {}) {
   return Response.json(data, {
+    ...init,
     headers: {
       'Cache-Control': 'no-store',
       ...(init.headers || {}),
     },
-    ...init,
   });
 }
 
@@ -23,27 +22,24 @@ function cleanText(value, limit) {
   return String(value || '').replace(/\s+/g, ' ').trim().slice(0, limit);
 }
 
-function hasStudyAccess(request) {
-  return request.headers.get('X-Study-Access') === STUDY_ACCESS_CODE;
-}
-
 async function getUsage(env, usageDate) {
-  if (!env.STUDY_DB) return { request_count: 0 };
   const row = await env.STUDY_DB.prepare(
     'SELECT request_count FROM study_ai_usage WHERE usage_date = ?',
   ).bind(usageDate).first();
   return row || { request_count: 0 };
 }
 
-async function incrementUsage(env, usageDate) {
-  if (!env.STUDY_DB) return;
+async function reserveUsage(env, usageDate) {
   await env.STUDY_DB.prepare(`
-    INSERT INTO study_ai_usage (usage_date, request_count, updated_at)
-    VALUES (?, 1, CURRENT_TIMESTAMP)
-    ON CONFLICT(usage_date) DO UPDATE SET
-      request_count = request_count + 1,
-      updated_at = CURRENT_TIMESTAMP
+    INSERT OR IGNORE INTO study_ai_usage (usage_date, request_count)
+    VALUES (?, 0)
   `).bind(usageDate).run();
+  const result = await env.STUDY_DB.prepare(`
+    UPDATE study_ai_usage
+    SET request_count = request_count + 1, updated_at = CURRENT_TIMESTAMP
+    WHERE usage_date = ? AND request_count < ?
+  `).bind(usageDate, DAILY_REQUEST_LIMIT).run();
+  return result.meta?.changes === 1;
 }
 
 function getModeInstruction(mode) {
@@ -78,17 +74,6 @@ function getAiText(result) {
 }
 
 export async function onRequestPost({ request, env }) {
-  if (!hasStudyAccess(request)) {
-    return json(
-      {
-        ok: false,
-        code: 'STUDY_ACCESS_REQUIRED',
-        message: 'Open the Study page with the family password first.',
-      },
-      { status: 401 },
-    );
-  }
-
   if (!env.AI) {
     return json(
       {
@@ -100,19 +85,8 @@ export async function onRequestPost({ request, env }) {
     );
   }
 
-  const usageDate = todayKey();
-  const usage = await getUsage(env, usageDate);
-  if (usage.request_count >= DAILY_REQUEST_LIMIT) {
-    return json(
-      {
-        ok: false,
-        code: 'DAILY_LIMIT_REACHED',
-        message: 'The study helper has reached today\'s free-use limit. Try again tomorrow.',
-        limit: DAILY_REQUEST_LIMIT,
-        used: usage.request_count,
-      },
-      { status: 429 },
-    );
+  if (!env.STUDY_DB) {
+    return json({ ok: false, code: 'USAGE_LIMIT_UNAVAILABLE', message: 'The study helper is temporarily unavailable.' }, { status: 503 });
   }
 
   const body = await request.json().catch(() => ({}));
@@ -132,6 +106,25 @@ export async function onRequestPost({ request, env }) {
       },
       { status: 400 },
     );
+  }
+
+  const usageDate = todayKey();
+  let reserved;
+  let usage;
+  try {
+    reserved = await reserveUsage(env, usageDate);
+    usage = await getUsage(env, usageDate);
+  } catch {
+    return json({ ok: false, code: 'USAGE_LIMIT_UNAVAILABLE', message: 'The study helper is temporarily unavailable.' }, { status: 503 });
+  }
+  if (!reserved) {
+    return json({
+      ok: false,
+      code: 'DAILY_LIMIT_REACHED',
+      message: 'The study helper has reached today\'s free-use limit. Try again tomorrow.',
+      limit: DAILY_REQUEST_LIMIT,
+      used: usage.request_count,
+    }, { status: 429 });
   }
 
   const model = env.STUDY_AI_MODEL || DEFAULT_MODEL;
@@ -168,15 +161,19 @@ export async function onRequestPost({ request, env }) {
     },
   ];
 
-  const result = await env.AI.run(model, {
-    messages,
-    max_tokens: MAX_COMPLETION_TOKENS,
-    max_completion_tokens: MAX_COMPLETION_TOKENS,
-    temperature: 0.3,
-  });
+  let result;
+  try {
+    result = await env.AI.run(model, {
+      messages,
+      max_tokens: MAX_COMPLETION_TOKENS,
+      max_completion_tokens: MAX_COMPLETION_TOKENS,
+      temperature: 0.3,
+    });
+  } catch {
+    return json({ ok: false, code: 'AI_UNAVAILABLE', message: 'The study helper could not respond right now.' }, { status: 502 });
+  }
 
-  await incrementUsage(env, usageDate);
-  const newUsage = usage.request_count + 1;
+  const newUsage = usage.request_count;
 
   return json({
     ok: true,
@@ -191,20 +188,17 @@ export async function onRequestPost({ request, env }) {
   });
 }
 
-export async function onRequestGet({ request, env }) {
-  if (!hasStudyAccess(request)) {
-    return json(
-      {
-        ok: false,
-        code: 'STUDY_ACCESS_REQUIRED',
-        message: 'Open the Study page with the family password first.',
-      },
-      { status: 401 },
-    );
+export async function onRequestGet({ env }) {
+  if (!env.STUDY_DB) {
+    return json({ ok: false, code: 'USAGE_LIMIT_UNAVAILABLE', message: 'The study helper is temporarily unavailable.' }, { status: 503 });
   }
-
   const usageDate = todayKey();
-  const usage = await getUsage(env, usageDate);
+  let usage;
+  try {
+    usage = await getUsage(env, usageDate);
+  } catch {
+    return json({ ok: false, code: 'USAGE_LIMIT_UNAVAILABLE', message: 'The study helper is temporarily unavailable.' }, { status: 503 });
+  }
   return json({
     ok: true,
     model: env.STUDY_AI_MODEL || DEFAULT_MODEL,

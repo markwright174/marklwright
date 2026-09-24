@@ -1,5 +1,3 @@
-const STUDY_ACCESS_CODE = 'lily-study';
-
 function json(data, init = {}) {
   return Response.json(data, {
     headers: {
@@ -10,15 +8,7 @@ function json(data, init = {}) {
   });
 }
 
-function hasStudyAccess(request) {
-  return request.headers.get('X-Study-Access') === STUDY_ACCESS_CODE;
-}
-
 export async function onRequestPost({ request, env }) {
-  if (!hasStudyAccess(request)) {
-    return json({ ok: false, message: 'Study access required.' }, { status: 401 });
-  }
-
   if (!env.STUDY_DB) {
     return json({ ok: false, message: 'Study database is not configured.' }, { status: 501 });
   }

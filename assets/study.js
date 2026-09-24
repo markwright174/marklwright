@@ -101,7 +101,7 @@ async function persistClassAssignment(item, classId) {
   try {
     await fetch('/api/study/assign-material', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...window.getStudyAccessHeaders() },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ sourceId: item.sourceId, classId }),
     });
   } catch {
@@ -319,7 +319,7 @@ function renderFrontStudyChat() {
     try {
       const response = await fetch('/api/study/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...window.getStudyAccessHeaders() },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           scope: 'general',
           mode: selectedMode,
@@ -356,7 +356,7 @@ updateTranscripts.addEventListener('click', async () => {
   try {
     const response = await fetch('/api/study/update-transcripts', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...window.getStudyAccessHeaders() },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ source: 'study-page' }),
     });
     const result = await response.json();

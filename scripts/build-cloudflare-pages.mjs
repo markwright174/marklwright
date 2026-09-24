@@ -10,7 +10,9 @@ const staticPaths = [
   'experience',
   'portfolio',
   'study',
+  '_headers',
   '_redirects',
+  '_routes.json',
   'index.html',
 ];
 

@@ -45,7 +45,6 @@ function createCourseOptions() {
 
 async function fetchTrashItems() {
   const response = await fetch('/api/study/course-materials?classId=trash', {
-    headers: window.getStudyAccessHeaders(),
   });
   if (!response.ok) {
     throw new Error('Trash could not be loaded.');
@@ -57,7 +56,7 @@ async function fetchTrashItems() {
 async function persistMaterialChange(sourceId, changes) {
   const response = await fetch('/api/study/assign-material', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...window.getStudyAccessHeaders() },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ sourceId, ...changes }),
   });
   if (!response.ok) {
@@ -68,7 +67,7 @@ async function persistMaterialChange(sourceId, changes) {
 async function deleteMaterial(sourceId) {
   const response = await fetch('/api/study/assign-material', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...window.getStudyAccessHeaders() },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ sourceId, deleteForever: true }),
   });
   if (!response.ok) {

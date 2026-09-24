@@ -356,7 +356,7 @@ export default {
     const url = new URL(request.url);
 
     if (url.pathname === '/diagnostics') {
-      if (request.headers.get(STUDY_ACCESS_HEADER) !== env.STUDY_ACCESS_PASSWORD) {
+      if (!env.STUDY_ACCESS_PASSWORD || request.headers.get(STUDY_ACCESS_HEADER) !== env.STUDY_ACCESS_PASSWORD) {
         return Response.json({ ok: false, message: 'Study access required.' }, { status: 401 });
       }
 
