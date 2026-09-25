@@ -1,5 +1,11 @@
 # Plaud Study Import
 
+## Replacement device pending
+
+Lily's Plaud device was lost, and a replacement has been ordered. When the new device arrives, ask Mark for its serial through an appropriate private channel and review every transcript import path before changing the allowlist. The older direct-Plaud fallback in `functions/api/study/update-transcripts.js` still compares recordings with the lost device's hard-coded serial. Decide how to preserve access to older recordings while accepting the replacement, and keep the new serial out of tracked source if possible.
+
+The current Plaud AutoFlow email -> Worker -> D1 path does **not** check a device serial. Verify whether the replacement's AutoFlow email contains a trustworthy device identifier, update any filtering that can actually use it, and test that a new recording reaches the study page. Also verify the email routing and Worker diagnostics secret before redeploying the Worker. Leave the current import behavior unchanged until the replacement details are available.
+
 The Lily study page calls:
 
 ```text

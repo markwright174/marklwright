@@ -2,6 +2,8 @@
 
 Personal portfolio and family study site, published through Cloudflare Pages from `markwright174/marklwright`.
 
+**Next Plaud study-import session:** Lily's device was lost and a replacement is on order. Review the serial check in the direct-Plaud fallback and the absence of a serial check in the current email-to-D1 path when the new device arrives. See `docs/plaud-study-import.md` before updating or redeploying either path.
+
 The portfolio is public. `/study/` and `/api/study/*` run through Pages Functions middleware. Family members enter the shared password once and receive a signed, Secure, HttpOnly cookie for 30 days. The password is held in the Pages Production secret `STUDY_ACCESS_PASSWORD`; a separate random `STUDY_SESSION_SECRET` signs cookies. Neither belongs in Git or a client asset. The login page and all study responses send `noindex, nofollow` and avoid caching. This is a convenient family gate, so rotate the shared password before using it for sensitive material, especially because an older version was in Git history. Older immutable Cloudflare deployment URLs still serve their historical builds; do not treat this gate as protection for previously published material.
 
 ## Cloudflare configuration
