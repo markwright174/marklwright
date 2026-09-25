@@ -29,4 +29,6 @@ npm run build:cloudflare
 
 The tests cover the login gate and AI request limit. A basic static preview can use `python -m http.server 8788`, but it does not run Pages Functions and therefore cannot verify authentication. Verify the deployed gate through the Cloudflare Pages URL after publication.
 
+`npm run check` also verifies public-page navigation consistency, active navigation state, local links and preview assets, and safe new-tab links. Portfolio case pages use linked previews rather than embedded tools; the direct **Open** action appears before each preview.
+
 The source of record is `Projects/marklwright/` in the parent `codingDesign` repository. Commit there, then use `scripts/publish-portfolio.ps1 -Push` from the parent repository to update the publication repository and trigger Cloudflare Pages.
