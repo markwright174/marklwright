@@ -9,7 +9,7 @@ const courseClasses = [
     name: 'US History',
     driveFolderId: '1jZliIZU2o_Ax0npuK43W5RPXg4NzyLxt',
   },
-  { id: 'class-c', name: 'Fundamentals of Computer Science' },
+  { id: 'class-c', name: 'Creative Writing' },
   {
     id: 'class-d',
     name: 'Science',

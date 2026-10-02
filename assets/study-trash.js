@@ -1,7 +1,7 @@
 const trashClasses = [
   { id: 'class-a', name: 'Theatre Arts' },
   { id: 'class-b', name: 'US History' },
-  { id: 'class-c', name: 'Fundamentals of Computer Science' },
+  { id: 'class-c', name: 'Creative Writing' },
   { id: 'class-d', name: 'Science' },
   { id: 'class-e', name: 'English' },
   { id: 'class-f', name: 'PE/Health' },

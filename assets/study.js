@@ -1,11 +1,11 @@
 const defaultClasses = [
   { id: 'class-a', day: 'A Days', slot: 'A1', name: 'Theatre Arts', note: 'Monday, Wednesday, Friday', href: '/study/class-a/' },
   { id: 'class-b', day: 'A Days', slot: 'A2', name: 'US History', note: 'Monday, Wednesday, Friday', href: '/study/class-b/' },
-  { id: 'class-c', day: 'A Days', slot: 'A3', name: 'Fundamentals of Computer Science', note: 'Monday, Wednesday, Friday', href: '/study/class-c/' },
+  { id: 'class-g', day: 'A Days', slot: 'A3', name: 'Exploring Science', note: 'Monday, Wednesday, Friday', href: '/study/class-g/' },
   { id: 'class-d', day: 'A Days', slot: 'A4', name: 'Science', note: 'Monday, Wednesday, Friday', href: '/study/class-d/' },
   { id: 'class-e', day: 'B Days', slot: 'B1', name: 'English', note: 'Tuesday, Thursday, Friday', href: '/study/class-e/' },
   { id: 'class-f', day: 'B Days', slot: 'B2', name: 'PE/Health', note: 'Tuesday, Thursday, Friday', href: '/study/class-f/' },
-  { id: 'class-g', day: 'B Days', slot: 'B3', name: 'Exploring Science', note: 'Tuesday, Thursday, Friday', href: '/study/class-g/' },
+  { id: 'class-c', day: 'B Days', slot: 'B3', name: 'Creative Writing', note: 'Tuesday, Thursday, Friday', href: '/study/class-c/' },
   { id: 'class-h', day: 'B Days', slot: 'B4', name: 'Algebra 1', note: 'Tuesday, Thursday, Friday', href: '/study/class-h/' },
 ];
 
